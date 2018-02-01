@@ -32,7 +32,7 @@
 #' @param cov.mat a covariance matrix for the linear and nonlinear simulation.
 #'                Defaults to \code{NULL} which means the structure
 #'                will be sampled from \code{cor}
-#' @param stn     a numeric indicating the scale parameter of the target noise
+#' @param sig.e  a numeric indicating the scale parameter of the target noise
 #' @param plot a logical determining whether true effects should be plotted.
 #'             This option is unavailable for
 #'             \code{linvars} + \code{nlinvars} > 20
@@ -47,18 +47,18 @@
 #' 
 #' sim_data <- Xy()$data
 #' 
-Xy <-       function(n = 1000, # number of observations
-                     linvars = 5,  # number of linear variables
-                     nlinvars = 10, # number of nonlinear variables
-                     noisevars = 5, # number of noise variables
-                     nlfun = function(x) x^2, # nonlinear transformation
-                     interaction = 2, # maximum interaction depth
-                     sig = c(1,5), # gaussian scale parameter bounds
-                     cor = c(0.1,0.3), # intercorrelation bounds
-                     m.mag = c(-5,5), # the multiplication magnitude
-                     cov.mat = NULL, # Optional: Push through covariance matrix
-                     stn = 4,
-                     plot = TRUE # gaussian scale parameter of target noise
+Xy <-       function(n = 1000, 
+                     linvars = 5,  
+                     nlinvars = 10, 
+                     noisevars = 5, 
+                     nlfun = function(x) x^2,
+                     interaction = 2,
+                     sig = c(1,5), 
+                     cor = c(0.1,0.3),
+                     m.mag = c(-5,5),
+                     cov.mat = NULL,
+                     sig.e = 4,
+                     plot = TRUE
                      ) {
   
   library(data.table)
@@ -67,7 +67,9 @@ Xy <-       function(n = 1000, # number of observations
   # funs -----
   # extracts the name out of 'int.mat'
   ext.name <- function(i, x, var) {
-    return(paste0(paste0(x[x[, i] != 0, i], var[x[, i] != 0]), collapse = " * "))
+    
+    OUT <- paste0(paste0(x[x[, i] != 0, i], var[x[, i] != 0]), collapse = " * ")
+    
   }
   
   # adds interaction terms to the process
@@ -175,10 +177,19 @@ Xy <-       function(n = 1000, # number of observations
                     var = names(FEATURES)[seq_len(NCOL(int.mat))])
   
   # fix negative terms
-  int.raw <- gsub("(.*)", "\\(\\1\\)", int.raw[grep("-", int.raw)])
+  int.raw[grep("-", int.raw)] <- gsub("(.*)", "\\(\\1\\)", int.raw[grep("-", int.raw)])
   
   # describe y
-  dgp <- paste0("y = ", paste0(int.raw, collapse = " + "), " + e ~ N(0,",stn,")")
+  dgp <- paste0("y = ", paste0(int.raw, collapse = " + "))
+  
+  # fix - terms
+  dgp <- gsub(" \\+ \\(-", " - ", dgp)
+  
+  # fix brackets
+  dgp <- gsub("\\)|\\(", "", dgp)
+  
+  # add error
+  dgp <- paste0(dgp, " + e ~ N(0,",stn,")")
   
   # create target ----
   VARS <- apply(VARS, scale, center = TRUE, scale = TRUE, MARGIN = 2)
