@@ -26,21 +26,20 @@
 #' @param nlfun a function transforming nonlinear variables
 #' @param interaction an integer specifying the interaction depth
 #' @param sig a vector c(min, max) indicating the scale parameter to sample from
-#' @param cor a vector c(min, max) determining correlation to sample from
+#' @param cor a vector c(min, max) determining correlation to sample from.
 #' @param m.mag a vector c(min, max) specifying 
-#'              the multiplication magnitud to sample from
+#'              the multiplication magnitude to sample from
 #' @param cov.mat a covariance matrix for the linear and nonlinear simulation.
 #'                Defaults to \code{NULL} which means the structure
 #'                will be sampled from \code{cor}
 #' @param sig.e  a numeric indicating the scale parameter of the target noise
-#' @param plot a logical determining whether true effects should be plotted.
-#'             This option is unavailable for
-#'             \code{linvars} + \code{nlinvars} > 20
+#' @param noise.coll a boolean determining noise collinearity with X
 #'
 #' @return a list with the following entries
 #' \item \code{data} - the simulated data.table
 #' \item \code{dgp} - the data generated process as a string
-#' \item \code{plot} - a ggplot if aplicable
+#' \item \code{plot} - a ggplot if aplicable. This option is unavailable for
+#'             \code{linvars} + \code{nlinvars}
 #' @export
 #'
 #' @examples
@@ -53,12 +52,12 @@ Xy <-       function(n = 1000,
                      noisevars = 5, 
                      nlfun = function(x) x^2,
                      interaction = 2,
-                     sig = c(1,5), 
+                     sig = c(1,4), 
                      cor = c(0.1,0.3),
                      m.mag = c(-5,5),
                      cov.mat = NULL,
                      sig.e = 4,
-                     plot = TRUE
+                     noise.coll = FALSE
                      ) {
   
   library(data.table)
@@ -102,23 +101,28 @@ Xy <-       function(n = 1000,
   }
   
   # features ----
-  # dictionary
-  mapping <- c("NLIN" = nlinvars, "LIN" = linvars)
-  
+  # handle noise collinearity
+  if (noise.coll) {
+    # dictionary
+    mapping <- c("NLIN" = nlinvars, 
+                 "LIN" = linvars,
+                 "NOISE" = noisevars)
+    # handle wrong dimensionality due to noise variables
+    n.coll <- noisevars
+  } else {
+    # dictionary
+    mapping <- c("NLIN" = nlinvars, "LIN" = linvars)
+    # handle wrong dimensionality due to noise variables
+    n.coll <- 0
+  }
+ 
   # total number of variables
-  vars <-  linvars + nlinvars
-  
-  # invoke linear features
-  FEATURES <-
-    VARS <-
-    matrix(rep(seq(-1, 1, length.out = n), vars),
-           nrow = n,
-           ncol = vars)
+  vars <-  sum(mapping)
   
   # handle covariance matrix
   if (is.null(cov.mat)) {
     # covariance
-    cov.mat <- matrix(runif(vars ^ 2, min(cor), max(cor)),
+    cov.mat <- matrix(runif(vars^2, min(cor), max(cor)),
                       nrow = vars,
                       ncol = vars)
     # variance
@@ -127,31 +131,36 @@ Xy <-       function(n = 1000,
                            max(sig))
   }
   
-  # sampled noise
-  cor.noise <- matrix(rnorm(n * vars, min(sig), max(sig)),
+  # sample features
+  FEATURES <- matrix(rnorm(n = n * vars, 
+                            mean = 0,
+                            sd = runif(1, min(sig), max(sig))),
                       ncol = vars, nrow = n) %*%  chol(cov.mat)
   
-  # add noise
-  FEATURES <- VARS <- FEATURES + cor.noise
+  # copy features
+  VARS <- FEATURES[, 1:(vars-n.coll)]
   
   # set features as data.table
   FEATURES <- data.table(FEATURES)
   
   # transform nonlinear part
   if (nlinvars > 0) {
-    VARS[, 1:nlinvars] <- sapply(VARS[, 1:nlinvars],
+    VARS[, 1:nlinvars] <- apply(VARS[, 1:nlinvars],
+                                MARGIN = 2,
                                  FUN = nlfun)
   }
   
+
   # set names
   names(FEATURES) <- unlist(sapply(seq_len(length(mapping)),
                                    set.var.name, x = mapping))
   
   # noise ----
-  if (noisevars > 0) {
+  if (noisevars > 0 && !noise.coll) {
     S <- matrix(runif(noisevars ^ 2, min(cor), max(cor)),
                 nrow = noisevars,
                 ncol = noisevars)
+    
     # fix diagonal
     diag(S) <- runif(NCOL(S), min(sig), max(sig))
     
@@ -164,7 +173,7 @@ Xy <-       function(n = 1000,
   
   # manage interactions ----
   # interaction matrix raw (no interactions)
-  int.mat <- diag(round(runif(vars, min(m.mag), max(m.mag)), 2))
+  int.mat <- diag(round(runif(vars-n.coll, min(m.mag), max(m.mag)), 2))
   
   # sample interactions
   if (interaction > 1) {
@@ -172,7 +181,7 @@ Xy <-       function(n = 1000,
   }
   
   # extract the target generating process
-  int.raw <- sapply(seq_len(NCOL(int.mat)),
+  int.raw <- sapply(seq_len(NCOL(int.mat)-n.coll),
                     FUN = ext.name,
                     x = int.mat,
                     var = names(FEATURES)[seq_len(NCOL(int.mat))])
@@ -207,7 +216,7 @@ Xy <-       function(n = 1000,
                                        scale = TRUE)]
   
   # plot true effects
-  if (plot && vars < 20 && n < 10000) {
+  if (plot && (vars - n.coll) < 20 && n < 10000) {
     
     plot.dat <- FEATURES[, c(1:vars, NCOL(FEATURES)), with = FALSE]
     names(plot.dat) <- c(names(FEATURES)[seq_len(NCOL(FEATURES)-noisevars-1)], "y")
@@ -215,7 +224,7 @@ Xy <-       function(n = 1000,
     melted.dat <- melted.dat[order(value),  .SD, by = variable]
     p <- ggplot(melted.dat, aes(x = value, y = y)) + 
                 geom_point(colour = "#13235B") + 
-                facet_wrap( ~ variable) + 
+                facet_wrap( ~ variable, scale = "free") + 
                 theme_minimal(base_size = 14) +
                 xlab("") +
                 ggtitle("True effects X vs y") +
