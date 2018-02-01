@@ -67,9 +67,10 @@ Xy <-       function(n = 1000,
   # funs -----
   # extracts the name out of 'int.mat'
   ext.name <- function(i, x, var) {
-    
-    OUT <- paste0(paste0(x[x[, i] != 0, i], var[x[, i] != 0]), collapse = " * ")
-    
+    OUT <- paste0(paste0(x[x[, i] != 0, i],
+                         var[x[, i] != 0]),
+                  collapse = " * ")
+    return(OUT)
   }
   
   # adds interaction terms to the process
@@ -189,7 +190,7 @@ Xy <-       function(n = 1000,
   dgp <- gsub("\\)|\\(", "", dgp)
   
   # add error
-  dgp <- paste0(dgp, " + e ~ N(0,",stn,")")
+  dgp <- paste0(dgp, " + e ~ N(0,",sig.e,")")
   
   # create target ----
   VARS <- apply(VARS, scale, center = TRUE, scale = TRUE, MARGIN = 2)
@@ -206,7 +207,7 @@ Xy <-       function(n = 1000,
                                        scale = TRUE)]
   
   # plot true effects
-  if (plot && vars < 20) {
+  if (plot && vars < 20 && n < 10000) {
     
     plot.dat <- FEATURES[, c(1:vars, NCOL(FEATURES)), with = FALSE]
     names(plot.dat) <- c(names(FEATURES)[seq_len(NCOL(FEATURES)-noisevars-1)], "y")
