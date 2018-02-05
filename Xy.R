@@ -27,17 +27,19 @@
 #' @param interaction an integer specifying the interaction depth
 #' @param sig a vector c(min, max) indicating the scale parameter to sample from
 #' @param cor a vector c(min, max) determining correlation to sample from.
-#' @param m.mag a vector c(min, max) specifying 
+#' @param weights a vector c(min, max) specifying 
 #'              the multiplication magnitude to sample from
 #' @param cov.mat a covariance matrix for the linear and nonlinear simulation.
 #'                Defaults to \code{NULL} which means the structure
 #'                will be sampled from \code{cor}
 #' @param sig.e  a numeric indicating the scale parameter of the target noise
 #' @param noise.coll a boolean determining noise collinearity with X
-#'
+#' @param plot a boolean indicating whether true effects should be plotted
+#' 
 #' @return a list with the following entries
 #' \item \code{data} - the simulated data.table
 #' \item \code{dgp} - the data generated process as a string
+#' \item \code{control} - a list matching the call
 #' \item \code{plot} - a ggplot if aplicable. This option is unavailable for
 #'             \code{linvars} + \code{nlinvars}
 #' @export
@@ -51,17 +53,20 @@ Xy <-       function(n = 1000,
                      nlinvars = 10, 
                      noisevars = 5, 
                      nlfun = function(x) x^2,
-                     interaction = 2,
+                     interaction = 1,
                      sig = c(1,4), 
                      cor = c(0.1,0.3),
-                     m.mag = c(-5,5),
+                     weights = c(-5,5),
                      cov.mat = NULL,
                      sig.e = 4,
-                     noise.coll = FALSE
+                     noise.coll = FALSE,
+                     plot = FALSE
                      ) {
   
   library(data.table)
   library(ggplot2)
+  
+  input <- as.list(environment())
   
   # funs -----
   # extracts the name out of 'int.mat'
@@ -73,13 +78,13 @@ Xy <-       function(n = 1000,
   }
   
   # adds interaction terms to the process
-  add.interactions <- function(x, m.mag, interaction) {
+  add.interactions <- function(x, weights, interaction) {
     for (COL in seq_len(NCOL(x))) {
       # sample interaction
       sample.value <- sample(c(0, round(runif(
         interaction - 1,
-        min(m.mag),
-        max(m.mag)
+        min(weights),
+        max(weights)
       ), 2)),
       replace = FALSE,
       size = interaction - 1)
@@ -173,11 +178,11 @@ Xy <-       function(n = 1000,
   
   # manage interactions ----
   # interaction matrix raw (no interactions)
-  int.mat <- diag(round(runif(vars-n.coll, min(m.mag), max(m.mag)), 2))
+  int.mat <- diag(round(runif(vars-n.coll, min(weights), max(weights)), 2))
   
   # sample interactions
   if (interaction > 1) {
-    int.mat <- add.interactions(int.mat, m.mag, interaction)
+    int.mat <- add.interactions(int.mat, weights, interaction)
   }
   
   # extract the target generating process
@@ -216,26 +221,22 @@ Xy <-       function(n = 1000,
                                        scale = TRUE)]
   
   # plot true effects
-  if (plot && (vars - n.coll) < 20 && n < 10000) {
+  if (plot) {
     
     plot.dat <- FEATURES[, c(1:vars, NCOL(FEATURES)), with = FALSE]
     names(plot.dat) <- c(names(FEATURES)[seq_len(NCOL(FEATURES)-noisevars-1)], "y")
     melted.dat <- melt(plot.dat, "y")
     melted.dat <- melted.dat[order(value),  .SD, by = variable]
-    p <- ggplot(melted.dat, aes(x = value, y = y)) + 
+    plot <- ggplot(melted.dat, aes(x = value, y = y)) + 
                 geom_point(colour = "#13235B") + 
                 facet_wrap( ~ variable, scale = "free") + 
                 theme_minimal(base_size = 14) +
                 xlab("") +
                 ggtitle("True effects X vs y") +
                 geom_smooth(method = "loess", colour = "#00C792")
-      
-  # handle too many variable + no plot wanted  
-  } else {
-    p <- NULL
   }
   
   # return ----
-  return(list(data = FEATURES, dgp = dgp, plot = p))
+  return(list(data = FEATURES, dgp = dgp, control = input,  plot = plot))
 }
   
