@@ -14,10 +14,11 @@
 #' Xy
 #'
 #' A function which simulates linear and nonlinear features and a corresponding
-#' target. The influence on the target is highly customizable, i.e. interaction
-#' depth can be specified. Furthermore, the nonlinearity can be specified via a
-#' transformation function. Additionally coviarance structure of the features
-#' can either be sampled by the function or specifically determined by the user.
+#' target. The composition of the target is highly customizable.
+#' Furthermore, the polynomial degree as well as the functional shape of
+#' nonlinearity can be specified by the user. Additionally coviarance structure
+#' of the features can either be sampled by the function or specifically 
+#' determined by the user.
 #' 
 #' @param n an integer specifying the number of observations
 #' @param linvars an integer specifying the number of linear features
@@ -46,6 +47,7 @@
 #'
 #' @examples
 #' 
+#' set.seed(1337)
 #' sim_data <- Xy()$data
 #' 
 Xy <-       function(n = 1000, 
@@ -68,7 +70,7 @@ Xy <-       function(n = 1000,
   
   input <- as.list(environment())
   
-  # funs -----
+  # functions -----
   # extracts the name out of 'int.mat'
   ext.name <- function(i, x, var) {
     OUT <- paste0(paste0(x[x[, i] != 0, i],
@@ -105,6 +107,74 @@ Xy <-       function(n = 1000,
     return(paste0(names(x)[i], "_", seq_len(x[i])))
   }
   
+  # issue warnings ----
+  # n
+  if(!is.numeric(n)) {
+    stop(paste0(sQuote("n"), " has to be a numeric value."))
+  }
+  
+  # nlinvars
+  if(!is.numeric(nlinvars)) {
+    stop(paste0(sQuote("nlinvars"), " has to be a numeric value."))
+  }
+  
+  # linvars
+  if(!is.numeric(linvars)) {
+    stop(paste0(sQuote("linvars"), " has to be a numeric value."))
+  }
+  
+  # noisevars
+  if(!is.numeric(noisevars)) {
+    stop(paste0(sQuote("noisevars"), " has to be a numeric value."))
+  }
+  
+  # interaction
+  if(!is.numeric(interaction)) {
+    stop(paste0(sQuote("interaction"), " has to be a numeric value."))
+  }
+  
+  # interaction
+  if(!is.numeric(sig.e)) {
+    stop(paste0(sQuote("sig.e"), " has to be a numeric value."))
+  }
+  
+  # nlfun
+  if(!is.function(nlfun)) {
+    stop(paste0(sQuote("nlfun"), " has to be a function"))
+  }
+  
+  # sig
+  if(!length(sig) %in% c(1,2)) {
+    stop(paste0(sQuote("sig"), " has to be either a vector of numeric values",
+                               " specifying variance boundries or a numeric value."))
+  }
+  
+  # weights
+  if(!length(weights) %in% c(1,2) | 
+     !is.numeric(weights)) {
+    stop(paste0(sQuote("weights"), "has to be a vector specifying a numeric range",
+                               " or a single numeric."))
+  }
+  
+  # weights
+  if(!length(cor) %in% c(1,2) | 
+     !is.numeric(cor) | 
+     any(cor > 1) | 
+     any(cor < 0)) {
+    stop(paste0(sQuote("cor"), "has to be a vector specifying a numeric range",
+                               " (in [0,1]) or a single numeric."))
+  }
+  
+  # plot
+  if(!is.logical(plot)) {
+    stop(paste0(sQuote("plot"), " has to be a boolean."))
+  }
+  
+  # noise.coll
+  if(!is.logical(noise.coll)) {
+    stop(paste0(sQuote("noise.coll"), " has to be a boolean."))
+  }
+
   # features ----
   # handle noise collinearity
   if (noise.coll) {
@@ -123,6 +193,26 @@ Xy <-       function(n = 1000,
  
   # total number of variables
   vars <-  sum(mapping)
+ 
+  # issue warning cov.mat ----
+  if(!is.null(cov.mat)) {
+    
+    cov.mat <- tryCatch({as.matrix(cov.mat)},
+                        error = function(e) return(NA))
+    
+    if(is.na(cov.mat)) {
+      stop(paste0("Tried to coerce", sQuote("cov.mat"),
+                  " to a matrix, but could not succeed."))
+    }
+    
+    if(NCOL(cov.mat) != vars) {
+      stop(paste0("The user-specified covariance matrix",
+                  " has insufficient columns: ",
+                  NCOL(cov.mat), " for ",
+                  vars, " variables. Reconsider ", 
+                  sQuote("cov.mat"), "."))
+    }
+  }
   
   # handle covariance matrix
   if (is.null(cov.mat)) {
