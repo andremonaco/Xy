@@ -21,8 +21,9 @@
 #' determined by the user.
 #' 
 #' @param n an integer specifying the number of observations
-#' @param linvars an integer specifying the number of linear features
-#' @param nlinvars an integer determining the number of nonlinear features
+#' @param xvars a numeric vector specifying the number of linear and nonlinear
+#'              features. For instance, \code{c(5, 10)} corresponds to
+#'              five linear and ten non-linear features.
 #' @param noisevars an integer determining the number of noise variables
 #' @param nlfun a function transforming nonlinear variables
 #' @param interaction an integer specifying the interaction depth
@@ -42,7 +43,7 @@
 #' \item \code{dgp} - the data generated process as a string
 #' \item \code{control} - a list matching the call
 #' \item \code{plot} - a ggplot if aplicable. This option is unavailable for
-#'             \code{linvars} + \code{nlinvars}
+#'             \code{xvars[1]} + \code{xvars[2]}
 #' @export
 #'
 #' @examples
@@ -51,9 +52,9 @@
 #' sim_data <- Xy()$data
 #' 
 Xy <-       function(n = 1000, 
-                     linvars = 5,  
-                     nlinvars = 10, 
-                     noisevars = 5, 
+                     xvars = c(5, 10),
+                     arvars = c(0, 0),
+                     noisevars = 5,
                      nlfun = function(x) x^2,
                      interaction = 1,
                      sig = c(1,4), 
@@ -115,14 +116,20 @@ Xy <-       function(n = 1000,
     stop(paste0(sQuote("n"), " has to be a numeric value."))
   }
   
-  # nlinvars
-  if(!is.numeric(nlinvars)) {
-    stop(paste0(sQuote("nlinvars"), " has to be a numeric value."))
+  # xvars character
+  if(!is.numeric(xvars)) {
+    stop(paste0(sQuote("xvars"), " has to be a numeric."))
   }
   
-  # linvars
-  if(!is.numeric(linvars)) {
-    stop(paste0(sQuote("linvars"), " has to be a numeric value."))
+  # insufficient length
+  if(length(xvars) != 2) {
+    if (length(xvars) > 2) {
+    xvars <- xvars[1:2]
+    } else {
+    xvars <- c(xvars, 0)
+    }
+    warning(paste0(sQuote("xvars"), " has to be of length two. Following settings ",
+                  "are used: Linear (", xvars[1], ") and nonlinear (", xvars[2], ")"))
   }
   
   # noisevars
@@ -135,7 +142,7 @@ Xy <-       function(n = 1000,
     stop(paste0(sQuote("interaction"), " has to be a numeric value."))
   }
   
-  # interaction
+  # sigma e
   if(!is.numeric(sig.e)) {
     stop(paste0(sQuote("sig.e"), " has to be a numeric value."))
   }
@@ -181,14 +188,14 @@ Xy <-       function(n = 1000,
   # handle noise collinearity
   if (noise.coll) {
     # dictionary
-    mapping <- c("NLIN" = nlinvars, 
-                 "LIN" = linvars,
+    mapping <- c("NLIN" = xvars[2], 
+                 "LIN" = xvars[1],
                  "NOISE" = noisevars)
     # handle wrong dimensionality due to noise variables
     n.coll <- noisevars
   } else {
     # dictionary
-    mapping <- c("NLIN" = nlinvars, "LIN" = linvars)
+    mapping <- c("NLIN" = xvars[2], "LIN" = xvars[1])
     # handle wrong dimensionality due to noise variables
     n.coll <- 0
   }
@@ -241,10 +248,10 @@ Xy <-       function(n = 1000,
   FEATURES <- data.table(FEATURES)
   
   # transform nonlinear part
-  if (nlinvars > 0) {
-    VARS[, 1:nlinvars] <- apply(VARS[, 1:nlinvars],
+  if (xvars[2] > 0) {
+    VARS[, 1:xvars[2]] <- apply(VARS[, 1:xvars[2]],
                                 MARGIN = 2,
-                                 FUN = nlfun)
+                                FUN = nlfun)
   }
   
 
