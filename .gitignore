@@ -1,8 +1,9 @@
 .Rproj.user
-.Rhistory
-.RData
+*.Rhistory
+*.RData
 .Ruserdata
-.Rproj
+*.Rproj
 .DS
-.jpeg
+*.jpeg
 .html
+README.html
