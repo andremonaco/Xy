@@ -65,9 +65,11 @@ Xy <-       function(n = 1000,
                      plot = FALSE
                      ) {
   
+  # dependencies
   library(data.table)
   library(ggplot2)
   
+  # save input
   input <- as.list(environment())
   
   # functions -----
