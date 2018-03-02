@@ -26,7 +26,11 @@
 #'              five linear and ten non-linear features.
 #' @param noisevars an integer determining the number of noise variables
 #' @param nlfun a function transforming nonlinear variables
-#' @param interaction an integer specifying the interaction depth
+#' @param interactions a vector of integer specifying the interaction depth of
+#'                    of regular features and autoregressive features if
+#'                    applicable. For instance, \code{c(3, 2)} would translate to
+#'                    using xvars interactions of at most of degree three and
+#'                    autoregressive interactions at most of degree two.
 #' @param sig a vector c(min, max) indicating the scale parameter to sample from
 #' @param cor a vector c(min, max) determining correlation to sample from.
 #' @param weights a vector c(min, max) specifying 
@@ -34,7 +38,7 @@
 #' @param cov.mat a covariance matrix for the linear and nonlinear simulation.
 #'                Defaults to \code{NULL} which means the structure
 #'                will be sampled from \code{cor}
-#' @param sig.e  a numeric indicating the scale parameter of the target noise
+#' @param stn a numeric value determining the signal to noise ratio
 #' @param noise.coll a boolean determining noise collinearity with X
 #' @param plot a boolean indicating whether true effects should be plotted
 #' 
@@ -42,9 +46,7 @@
 #' \item \code{data} - the simulated data.table
 #' \item \code{dgp} - the data generated process as a string
 #' \item \code{control} - a list matching the call
-#' \item \code{plot} - a ggplot if aplicable. This option is unavailable for
-#'             \code{xvars[1]} + \code{xvars[2]}
-#' @export
+#' \item \code{plot} - a ggplot if applicable
 #'
 #' @examples
 #' 
@@ -52,31 +54,31 @@
 #' sim_data <- Xy()$data
 #' 
 Xy <-       function(n = 1000, 
-                     xvars = c(5, 10),
-                     arvars = c(0, 0),
+                     xvars = c(2, 2),
+                     lags = NULL,
                      noisevars = 5,
                      nlfun = function(x) x^2,
-                     interaction = 1,
+                     interactions = c(1, 1),
                      sig = c(1,4), 
                      cor = c(0.1,0.3),
                      weights = c(-5,5),
                      cov.mat = NULL,
-                     sig.e = 4,
+                     stn = 0.01,
                      noise.coll = FALSE,
-                     plot = FALSE
+                     plot = TRUE
                      ) {
   
   # dependencies
   library(data.table)
   library(ggplot2)
   
-  # save input
+  # save input9
   input <- as.list(environment())
   
   # functions -----
   # extracts the name out of 'int.mat'
   ext.name <- function(i, x, var) {
-    OUT <- paste0(paste0(x[x[, i] != 0, i],
+    OUT <- paste0(paste0(round(x[x[, i] != 0, i], 2),
                          var[x[, i] != 0]),
                   collapse = " * ")
     return(OUT)
@@ -138,12 +140,12 @@ Xy <-       function(n = 1000,
   }
   
   # interaction
-  if(!is.numeric(interaction)) {
-    stop(paste0(sQuote("interaction"), " has to be a numeric value."))
+  if(!is.numeric(interactions)) {
+    stop(paste0(sQuote("interactions"), " has to be a numeric vector"))
   }
   
-  # sigma e
-  if(!is.numeric(sig.e)) {
+  # signal to noise
+  if(!is.numeric(stn)) {
     stop(paste0(sQuote("sig.e"), " has to be a numeric value."))
   }
   
@@ -183,6 +185,8 @@ Xy <-       function(n = 1000,
   if(!is.logical(noise.coll)) {
     stop(paste0(sQuote("noise.coll"), " has to be a boolean."))
   }
+  
+  # preliminaries ----
 
   # features ----
   # handle noise collinearity
@@ -280,8 +284,8 @@ Xy <-       function(n = 1000,
   int.mat <- diag(round(runif(vars-n.coll, min(weights), max(weights)), 2))
   
   # sample interactions
-  if (interaction > 1) {
-    int.mat <- add.interactions(int.mat, weights, interaction)
+  if (interactions[1] > 1) {
+    int.mat <- add.interactions(int.mat, weights, interactions[1])
   }
   
   # extract the target generating process
@@ -296,6 +300,17 @@ Xy <-       function(n = 1000,
   # describe y
   dgp <- paste0("y = ", paste0(int.raw, collapse = " + "))
   
+  # create target ----
+  VARS <- apply(VARS, scale, center = TRUE, scale = TRUE, MARGIN = 2)
+
+  target <- VARS %*%
+              int.mat %*%
+                  rep(1, NCOL(int.mat))
+  
+  # add to features
+  FEATURES[, y := target]
+  #EATURES[, names(FEATURES) := lapply(FEATURES, scale)]
+  
   # fix - terms
   dgp <- gsub(" \\+ \\(-", " - ", dgp)
   
@@ -303,27 +318,12 @@ Xy <-       function(n = 1000,
   dgp <- gsub("\\)|\\(", "", dgp)
   
   # add error
-  dgp <- paste0(dgp, " + e ~ N(0,",sig.e,")")
-  
-  # create target ----
-  VARS <- apply(VARS, scale, center = TRUE, scale = TRUE, MARGIN = 2)
-  target <-     VARS %*%
-                  int.mat %*%
-                    rep(1, NCOL(int.mat)) +
-                        rnorm(n, 0, stn)
-  
-  # add to features
-  FEATURES[, y := target]
-  FEATURES[, names(FEATURES) := lapply(FEATURES, 
-                                       scale,
-                                       center = TRUE, 
-                                       scale = TRUE)]
+  dgp <- paste0(dgp, " + e ~ N(0,",round(stn, 2),")")
   
   # plot true effects
   if (plot) {
     
-    plot.dat <- FEATURES[, c(1:vars, NCOL(FEATURES)), with = FALSE]
-    names(plot.dat) <- c(names(FEATURES)[seq_len(NCOL(FEATURES)-noisevars-1)], "y")
+    plot.dat <- FEATURES[, -grep("NOISE", names(FEATURES)), with = FALSE]
     melted.dat <- melt(plot.dat, "y")
     melted.dat <- melted.dat[order(value),  .SD, by = variable]
     plot <- ggplot(melted.dat, aes(x = value, y = y)) + 
@@ -336,6 +336,6 @@ Xy <-       function(n = 1000,
   }
   
   # return ----
-  return(list(data = FEATURES, dgp = dgp, control = input,  plot = plot))
+  return(list(data = na.omit(FEATURES), dgp = dgp, control = input,  plot = plot))
 }
   
