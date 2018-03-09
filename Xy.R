@@ -50,6 +50,7 @@
 #'
 #' @examples
 #' 
+#' 
 #' set.seed(1337)
 #' sim_data <- Xy()$data
 #' 
