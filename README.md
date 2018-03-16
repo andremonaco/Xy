@@ -1,6 +1,3 @@
-![](Xy-logo.jpeg)
-
-
 Simulating Supervised Learning Data
 ===================================
 
