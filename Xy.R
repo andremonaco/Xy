@@ -115,10 +115,10 @@ Xy <-       function(n = 1000,
   }
   
   # setup the correct name
-  set.var.name <- function(i, x) {
+  set.var.name <- function(i, x, noisevars) {
     if (x[i] == 0) return(NULL)
     return(paste0(names(x)[i], "_", formatC(seq_len(x[i]),
-                                            width = max(nchar(x))-1,
+                                            width = nchar(max(x, noisevars))-1,
                                             flag = "0")))
   }
   
@@ -266,7 +266,10 @@ Xy <-       function(n = 1000,
                                           prob = runif(catvars[2], 0, 1)))
   # factorize
   DUMMIES <- data.frame(sapply(DUMMIES, factor))
-  colnames(DUMMIES) <- paste0("DUMMY_", formatC(seq_len(catvars[1]), max(mapping)-1,
+  colnames(DUMMIES) <- paste0("DUMMY_", formatC(seq_len(catvars[1]),
+                                                max(nchar(c(noisevars,
+                                                            mapping, 
+                                                            catvars[1])))-1,
                                              flag = "0"))
   
   # bind model matrix
@@ -296,7 +299,8 @@ Xy <-       function(n = 1000,
 
   # set names
   names(FEATURES) <- unlist(sapply(seq_len(length(mapping)),
-                                   set.var.name, x = mapping))
+                                   set.var.name, x = mapping,
+                                   noisevars = noisevars))
   
   # noise ----
   if (noisevars > 0 && !noise.coll) {
