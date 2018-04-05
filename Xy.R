@@ -111,7 +111,7 @@ Xy <-       function(n = 1000,
   set.var.name <- function(i, x) {
     if (x[i] == 0) return(NULL)
     return(paste0(names(x)[i], "_", formatC(seq_len(x[i]),
-                                            width = nchar(x[i]),
+                                            width = nchar(x),
                                             flag = "0")))
   }
   
