@@ -206,7 +206,7 @@ Xy <-       function(n = 1000,
                  "LIN" = numvars[1],
                  "NOISE" = noisevars)
     # handle wrong dimensionality due to noise variables
-    n.coll <- noisevars + catvars[1]
+    n.coll <- noisevars
   } else {
     # dictionary
     mapping <- c("NLIN" = numvars[2], "LIN" = numvars[1])
@@ -256,7 +256,7 @@ Xy <-       function(n = 1000,
                       ncol = vars, nrow = n) %*%  chol(cov.mat)
   
   # create dummmy features
-  if (catvars[1] > 1) {
+  if (catvars[1] > 0) {
 
   DUMMIES <- do.call("data.frame", lapply(rep(list(seq_len(catvars[2])), 
                                           catvars[1]), 
@@ -346,10 +346,7 @@ Xy <-       function(n = 1000,
   # add dummy effects
   if (catvars[1] > 0) {
     target <- target + as.matrix(DUMMIES) %*% dw.mat %*% rep(1, NCOL(dw.mat))
-    dw.raw <- sapply(seq_len(NCOL(dw.mat)),
-                      FUN = ext.name,
-                      x = dw.mat,
-                      var = names(DUMMIES))
+    dw.raw <- names(DUMMIES)
     FEATURES <- cbind(FEATURES, DUMMIES)
   } else {
     dw.raw <- NULL
@@ -395,6 +392,9 @@ Xy <-       function(n = 1000,
   }
   
   # return ----
-  return(list(data = na.omit(FEATURES), dgp = dgp, control = input,  plot = plot))
+  return(list(data = na.omit(FEATURES), 
+              dgp = dgp, 
+              control = input,
+              plot = plot))
 }
   
