@@ -21,16 +21,19 @@
 #' determined by the user.
 #' 
 #' @param n an integer specifying the number of observations
-#' @param xvars a numeric vector specifying the number of linear and nonlinear
+#' @param numvars a numeric vector specifying the number of linear and nonlinear
 #'              features. For instance, \code{c(5, 10)} corresponds to
 #'              five linear and ten non-linear features.
+#' @param catvars a numeric vector determining the amount of categorical predictors.
+#'                With this vector you can choose how many categorical predictors should
+#'                enter the equation and secondly the respective amount of categories.
+#'                For instance, \code{catvars = c(2,5)} would correspond to creating
+#'                two categorical variables with five categories.
 #' @param noisevars an integer determining the number of noise variables
 #' @param nlfun a function transforming nonlinear variables
 #' @param interactions a vector of integer specifying the interaction depth of
 #'                    of regular features and autoregressive features if
-#'                    applicable. For instance, \code{c(3, 2)} would translate to
-#'                    using xvars interactions of at most of degree three and
-#'                    autoregressive interactions at most of degree two.
+#'                    applicable.
 #' @param sig a vector c(min, max) indicating the scale parameter to sample from
 #' @param cor a vector c(min, max) determining correlation to sample from.
 #' @param weights a vector c(min, max) specifying 
@@ -41,12 +44,15 @@
 #' @param stn a numeric value determining the signal to noise ratio
 #' @param noise.coll a boolean determining noise collinearity with X
 #' @param plot a boolean indicating whether true effects should be plotted
+#' @param intercept a boolean indicating whether an intercept should enter the model
 #' 
 #' @return a list with the following entries
 #' \item \code{data} - the simulated data.table
-#' \item \code{dgp} - the data generated process as a string
+#' \item \code{dgp} - the data generating process as a string
 #' \item \code{control} - a list matching the call
-#' \item \code{plot} - a ggplot if applicable
+#' \item \code{plot} - a ggplot if applicable. Caution when using this option paired
+#'                     with a high number of predictor variables. This could lead
+#'                     to a heavy computational burden
 #'
 #' @examples
 #' 
@@ -55,18 +61,19 @@
 #' sim_data <- Xy()$data
 #' 
 Xy <-       function(n = 1000, 
-                     xvars = c(2, 2),
-                     lags = NULL,
+                     numvars = c(2, 2),
+                     catvars = c(1, 2),
                      noisevars = 5,
                      nlfun = function(x) x^2,
-                     interactions = c(1, 1),
+                     interactions = 1,
                      sig = c(1,4), 
                      cor = c(0.1,0.3),
                      weights = c(-5,5),
                      cov.mat = NULL,
-                     stn = 0.01,
+                     stn = 0.1,
                      noise.coll = FALSE,
-                     plot = TRUE
+                     plot = TRUE,
+                     intercept = TRUE
                      ) {
   
   # dependencies
@@ -111,7 +118,7 @@ Xy <-       function(n = 1000,
   set.var.name <- function(i, x) {
     if (x[i] == 0) return(NULL)
     return(paste0(names(x)[i], "_", formatC(seq_len(x[i]),
-                                            width = nchar(x),
+                                            width = max(nchar(x))-1,
                                             flag = "0")))
   }
   
@@ -121,20 +128,20 @@ Xy <-       function(n = 1000,
     stop(paste0(sQuote("n"), " has to be a numeric value."))
   }
   
-  # xvars character
-  if(!is.numeric(xvars)) {
-    stop(paste0(sQuote("xvars"), " has to be a numeric."))
+  # numvars character
+  if(!is.numeric(numvars)) {
+    stop(paste0(sQuote("numvars"), " has to be a numeric."))
   }
   
   # insufficient length
-  if(length(xvars) != 2) {
-    if (length(xvars) > 2) {
-    xvars <- xvars[1:2]
+  if(length(numvars) != 2) {
+    if (length(numvars) > 2) {
+    numvars <- numvars[1:2]
     } else {
-    xvars <- c(xvars, 0)
+    numvars <- c(numvars, 0)
     }
-    warning(paste0(sQuote("xvars"), " has to be of length two. Following settings ",
-                  "are used: Linear (", xvars[1], ") and nonlinear (", xvars[2], ")"))
+    warning(paste0(sQuote("numvars"), " has to be of length two. Following settings ",
+                  "are used: Linear (", numvars[1], ") and nonlinear (", numvars[2], ")"))
   }
   
   # noisevars
@@ -149,7 +156,7 @@ Xy <-       function(n = 1000,
   
   # signal to noise
   if(!is.numeric(stn)) {
-    stop(paste0(sQuote("sig.e"), " has to be a numeric value."))
+    stop(paste0(sQuote("stn"), " has to be a numeric value."))
   }
   
   # nlfun
@@ -195,14 +202,14 @@ Xy <-       function(n = 1000,
   # handle noise collinearity
   if (noise.coll) {
     # dictionary
-    mapping <- c("NLIN" = xvars[2], 
-                 "LIN" = xvars[1],
+    mapping <- c("NLIN" = numvars[2], 
+                 "LIN" = numvars[1],
                  "NOISE" = noisevars)
     # handle wrong dimensionality due to noise variables
-    n.coll <- noisevars
+    n.coll <- noisevars + catvars[1]
   } else {
     # dictionary
-    mapping <- c("NLIN" = xvars[2], "LIN" = xvars[1])
+    mapping <- c("NLIN" = numvars[2], "LIN" = numvars[1])
     # handle wrong dimensionality due to noise variables
     n.coll <- 0
   }
@@ -248,6 +255,31 @@ Xy <-       function(n = 1000,
                             sd = runif(1, min(sig), max(sig))),
                       ncol = vars, nrow = n) %*%  chol(cov.mat)
   
+  # create dummmy features
+  if (catvars[1] > 1) {
+
+  DUMMIES <- do.call("data.frame", lapply(rep(list(seq_len(catvars[2])), 
+                                          catvars[1]), 
+                                          FUN = sample, 
+                                          replace = TRUE,
+                                          size = nrow(FEATURES), 
+                                          prob = runif(catvars[2], 0, 1)))
+  # factorize
+  DUMMIES <- data.frame(sapply(DUMMIES, factor))
+  colnames(DUMMIES) <- paste0("DUMMY_", formatC(seq_len(catvars[1]), max(mapping)-1,
+                                             flag = "0"))
+  
+  # bind model matrix
+  DUMMIES <- do.call("data.frame", lapply(seq_along(DUMMIES), FUN = function(i,x) {
+                                          the_name <- names(x)[i]
+                                          OUT <- model.matrix(~ . -1, data = data.frame(x[, i]))
+                                          colnames(OUT) <- paste0(the_name, "__", 1:ncol(OUT))
+                                          return(OUT)
+                                          }, x = DUMMIES))
+  # weights
+  dw.mat <- diag(round(runif(ncol(DUMMIES), min(weights), max(weights)), 2))
+  }
+  
   # copy features
   VARS <- FEATURES[, 1:(vars-n.coll)]
   
@@ -255,8 +287,8 @@ Xy <-       function(n = 1000,
   FEATURES <- data.table(FEATURES)
   
   # transform nonlinear part
-  if (xvars[2] > 0) {
-    VARS[, 1:xvars[2]] <- apply(VARS[, 1:xvars[2]],
+  if (numvars[2] > 0) {
+    VARS[, 1:numvars[2]] <- apply(VARS[, 1:numvars[2]],
                                 MARGIN = 2,
                                 FUN = nlfun)
   }
@@ -304,9 +336,6 @@ Xy <-       function(n = 1000,
   # fix negative terms
   int.raw[grep("-", int.raw)] <- gsub("(.*)", "\\(\\1\\)", int.raw[grep("-", int.raw)])
   
-  # describe y
-  dgp <- paste0("y = ", paste0(int.raw, collapse = " + "))
-  
   # create target ----
   VARS <- apply(VARS, scale, center = TRUE, scale = TRUE, MARGIN = 2)
 
@@ -314,9 +343,32 @@ Xy <-       function(n = 1000,
               int.mat %*%
                   rep(1, NCOL(int.mat))
   
+  # add dummy effects
+  if (catvars[1] > 0) {
+    target <- target + as.matrix(DUMMIES) %*% dw.mat %*% rep(1, NCOL(dw.mat))
+    dw.raw <- sapply(seq_len(NCOL(dw.mat)),
+                      FUN = ext.name,
+                      x = dw.mat,
+                      var = names(DUMMIES))
+    FEATURES <- cbind(FEATURES, DUMMIES)
+  } else {
+    dw.raw <- NULL
+  }
+  
+  # add intercept
+  if (intercept) {
+  int <-  runif(1, quantile(target, 0.25), quantile(target, 0.75))
+  int.paste <- paste0("y = ", round(int, 3), " + ")
+  target <- target + int
+  } else {
+  int.paste <- "y = "
+  }
+  
   # add to features
   FEATURES[, y := target]
-  #EATURES[, names(FEATURES) := lapply(FEATURES, scale)]
+  
+  # describe y
+  dgp <- paste0(int.paste, paste0(c(int.raw, dw.raw), collapse = " + "))
   
   # fix - terms
   dgp <- gsub(" \\+ \\(-", " - ", dgp)
@@ -330,7 +382,7 @@ Xy <-       function(n = 1000,
   # plot true effects
   if (plot) {
     
-    plot.dat <- FEATURES[, -grep("NOISE", names(FEATURES)), with = FALSE]
+    plot.dat <- FEATURES[, -grep("NOISE|DUMMY", names(FEATURES)), with = FALSE]
     melted.dat <- melt(plot.dat, "y")
     melted.dat <- melted.dat[order(value),  .SD, by = variable]
     plot <- ggplot(melted.dat, aes(x = value, y = y)) + 
