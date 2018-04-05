@@ -110,7 +110,9 @@ Xy <-       function(n = 1000,
   # setup the correct name
   set.var.name <- function(i, x) {
     if (x[i] == 0) return(NULL)
-    return(paste0(names(x)[i], "_", seq_len(x[i])))
+    return(paste0(names(x)[i], "_", formatC(seq_len(x[i]),
+                                            width = nchar(x[i]),
+                                            flag = "0")))
   }
   
   # issue warnings ----
@@ -275,7 +277,11 @@ Xy <-       function(n = 1000,
     
     noise.mat <-  data.table(matrix(rnorm(n * noisevars),
                                     ncol = noisevars, nrow = n) %*%  chol(S))
-    names(noise.mat) <- paste0("NOISE_", seq_len(noisevars))
+    
+    names(noise.mat) <- paste0("NOISE_",
+                               formatC(seq_len(noisevars), 
+                                       width = nchar(noisevars),
+                                       flag = "0"))
     
     FEATURES <- cbind(FEATURES, noise.mat)
   }
