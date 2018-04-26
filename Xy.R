@@ -34,6 +34,8 @@
 #' @param interactions a vector of integer specifying the interaction depth of
 #'                    of regular features and autoregressive features if
 #'                    applicable.
+#' @param type a character specifying the supervised learning task. Either "regression"
+#'             for regression tasks and "classification" for classification data.
 #' @param sig a vector c(min, max) indicating the scale parameter to sample from
 #' @param cor a vector c(min, max) determining correlation to sample from.
 #' @param weights a vector c(min, max) specifying 
@@ -64,6 +66,7 @@ Xy <-       function(n = 1000,
                      numvars = c(2, 2),
                      catvars = c(1, 2),
                      noisevars = 5,
+                     type = "regression",
                      nlfun = function(x) x^2,
                      interactions = 1,
                      sig = c(1,4), 
@@ -349,8 +352,15 @@ Xy <-       function(n = 1000,
   
   # add dummy effects
   if (catvars[1] > 0) {
-    target <- target + as.matrix(DUMMIES) %*% dw.mat %*% rep(1, NCOL(dw.mat))
-    dw.raw <- names(DUMMIES)
+    if (intercept) {
+      ref_class <- !grepl("*__1", names(DUMMIES))
+    } else {
+      ref_class <- rep(TRUE, ncol(DUMMIES))
+    }
+    target <- target + as.matrix(DUMMIES[, ref_class]) %*% dw.mat[, ref_class] %*% rep(1, NCOL(dw.mat))  
+    dw.raw <- paste0(diag(dw.mat)[ref_class], names(DUMMIES)[ref_class])
+    # fix negative terms
+    dw.raw[grep("-", dw.raw)] <- gsub("(.*)", "\\(\\1\\)", dw.raw[grep("-", dw.raw)])
     FEATURES <- cbind(FEATURES, DUMMIES)
   } else {
     dw.raw <- NULL
@@ -365,8 +375,26 @@ Xy <-       function(n = 1000,
   int.paste <- "y = "
   }
   
+  # add noise
+  noise <- sd(target)*stn
+  target <- target + rnorm(n, 0, noise)
+  
   # add to features
   FEATURES[, y := target]
+  
+  # classification
+  if (type == "classification") {
+  # logit link
+  FEATURES[, y := exp(target) / (1 + exp(target))]
+  FEATURES[, y := ifelse(y >= 0.5, 1, 0)]
+  }
+  
+  # multiclassification
+  #if (type == "multiclass") {
+  # logit link
+  #FEATURES[, y := exp(target) / (1 + exp(target))]
+  #FEATURES[, y := cut(y, seq(0,1, 1/classes))]
+  #}
   
   # describe y
   dgp <- paste0(int.paste, paste0(c(int.raw, dw.raw), collapse = " + "))
@@ -378,7 +406,7 @@ Xy <-       function(n = 1000,
   dgp <- gsub("\\)|\\(", "", dgp)
   
   # add error
-  dgp <- paste0(dgp, " + e ~ N(0,",round(stn, 2),")")
+  dgp <- paste0(dgp, " + e ~ N(0,", round(noise, 2),")")
   
   # plot true effects
   if (plot) {
