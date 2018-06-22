@@ -13,17 +13,17 @@
 #
 #' Xy
 #'
-#' A function which simulates linear and nonlinear features and a corresponding
+#' A function which simulates linear and nonlinear X and a corresponding
 #' target. The composition of the target is highly customizable.
 #' Furthermore, the polynomial degree as well as the functional shape of
 #' nonlinearity can be specified by the user. Additionally coviarance structure
-#' of the features can either be sampled by the function or specifically 
+#' of the X can either be sampled by the function or specifically 
 #' determined by the user.
 #' 
 #' @param n an integer specifying the number of observations
 #' @param numvars a numeric vector specifying the number of linear and nonlinear
-#'              features. For instance, \code{c(5, 10)} corresponds to
-#'              five linear and ten non-linear features.
+#'                X For instance, \code{c(5, 10)} corresponds to
+#'                five linear and ten non-linear X.
 #' @param catvars a numeric vector determining the amount of categorical predictors.
 #'                With this vector you can choose how many categorical predictors should
 #'                enter the equation and secondly the respective amount of categories.
@@ -32,63 +32,68 @@
 #' @param noisevars an integer determining the number of noise variables
 #' @param nlfun a function transforming nonlinear variables
 #' @param interactions a vector of integer specifying the interaction depth of
-#'                    of regular features and autoregressive features if
+#'                    of regular X and autoregressive X if
 #'                    applicable.
-#' @param type a character specifying the supervised learning task. Either "regression"
-#'             for regression tasks and "classification" for classification data.
+#' @param family a Xy family object as created with \code{\link{Xy_family}}
 #' @param sig a vector c(min, max) indicating the scale parameter to sample from
 #' @param cor a vector c(min, max) determining correlation to sample from.
 #' @param weights a vector c(min, max) specifying 
 #'              the multiplication magnitude to sample from
-#' @param cov.mat a covariance matrix for the linear and nonlinear simulation.
+#' @param sigma a covariance matrix for the linear and nonlinear simulation.
 #'                Defaults to \code{NULL} which means the structure
 #'                will be sampled from \code{cor}
-#' @param stn a numeric value determining the signal to noise ratio
+#' @param stn a numeric value determining the signal to noise ratio. Should be within the interval [0, 1].
+#'            Higher values lead to more signal and less noise.
 #' @param noise.coll a boolean determining noise collinearity with X
-#' @param plot a boolean indicating whether true effects should be plotted
 #' @param intercept a boolean indicating whether an intercept should enter the model
 #' 
+#' @import data.table ggplot2 gridExtra Matrix
+#' @importFrom stats model.matrix na.omit quantile rnorm runif sd formula
+#' @importFrom Matrix .bdiag
+#' 
+#' @exportClass Xy_sim
+#' 
+#' @author Andre Bleier (\email{andre.bleier@@statworx.com})
+#' 
 #' @return a list with the following entries
+#' \itemize{
 #' \item \code{data} - the simulated data.table
 #' \item \code{dgp} - the data generating process as a string
+#' \item \code{psi} - psi is a transformation matrix which transforms the raw data
+#'                    (stored in $data) to the true effects. However, you have to
+#'                    apply the nonlinear functions upfront. If you want to transform
+#'                    the data, please use \code{\link{transform}}
 #' \item \code{control} - a list matching the call
-#' \item \code{plot} - a ggplot if applicable. Caution when using this option paired
-#'                     with a high number of predictor variables. This could lead
-#'                     to a heavy computational burden
-#'
+#' }
+#' @export
+#' 
 #' @examples
 #' 
-#' 
 #' set.seed(1337)
-#' sim_data <- Xy()$data
+#' my_simulation <- Xy()
 #' 
 Xy <-       function(n = 1000, 
                      numvars = c(2, 2),
                      catvars = c(1, 2),
                      noisevars = 5,
-                     type = "regression",
+                     family = Xy_family(),
                      nlfun = function(x) x^2,
                      interactions = 1,
-                     sig = c(1,4), 
+                     sig = c(1,10), 
                      cor = c(0.1,0.3),
-                     weights = c(-5,5),
-                     cov.mat = NULL,
-                     stn = 0.1,
+                     weights = c(5,10),
+                     sigma = NULL,
+                     stn = 0.95,
                      noise.coll = FALSE,
-                     plot = TRUE,
                      intercept = TRUE
                      ) {
   
-  # dependencies
-  library(data.table)
-  library(ggplot2)
-  
-  # save input9
+  # save input
   input <- as.list(environment())
   
   # functions -----
-  # extracts the name out of 'int.mat'
-  ext.name <- function(i, x, var) {
+  # extracts the name out of 'INT'
+  ext_name <- function(i, x, var) {
     OUT <- paste0(paste0(round(x[x[, i] != 0, i], 2),
                          var[x[, i] != 0]),
                   collapse = " * ")
@@ -96,8 +101,8 @@ Xy <-       function(n = 1000,
   }
   
   # adds interaction terms to the process
-  add.interactions <- function(x, weights, interaction) {
-    for (COL in seq_len(NCOL(x))) {
+  add_interactions <- function(x, weights, interaction) {
+    for (c in seq_len(NCOL(x))) {
       # sample interaction
       sample.value <- sample(c(0, round(runif(
         interaction - 1,
@@ -108,32 +113,36 @@ Xy <-       function(n = 1000,
       size = interaction - 1)
       
       # sample position
-      sample.pos <- sample(seq_len(NCOL(x))[-COL],
+      sample.pos <- sample(seq_len(NCOL(x))[-c],
                            replace = FALSE,
                            size = interaction - 1)
       # overwrite interaction matrix
-      x[sample.pos, COL] <- sample.value
+      x[sample.pos, c] <- sample.value
     }
     return(x)
   }
   
   # setup the correct name
-  set.var.name <- function(i, x, noisevars) {
-    if (x[i] == 0) return(NULL)
-    return(paste0(names(x)[i], "_", formatC(seq_len(x[i]),
-                                            width = nchar(max(x, noisevars))-1,
-                                            flag = "0")))
+  set_var_name <- function(x, full) {
+    OUT <- c()
+    for (i in seq_along(x)) {
+    if (x[i] == 0) next
+     OUT <- c(OUT, paste0(names(x)[i], "_", formatC(seq_len(x[[i]]),
+                                                 width = nchar(max(do.call("c", full))),
+                                                 flag = "0")))
+    }
+    return(OUT)
   }
   
   # issue warnings ----
   # n
-  if(!is.numeric(n)) {
+  if(!is.numeric(n) | length(n) != 1) {
     stop(paste0(sQuote("n"), " has to be a numeric value."))
   }
   
   # numvars character
   if(!is.numeric(numvars)) {
-    stop(paste0(sQuote("numvars"), " has to be a numeric."))
+    stop(paste0(sQuote("numvars"), " has to be a numeric vector."))
   }
   
   # insufficient length
@@ -148,18 +157,29 @@ Xy <-       function(n = 1000,
   }
   
   # noisevars
-  if(!is.numeric(noisevars)) {
+  if(!is.numeric(noisevars) | length(noisevars) != 1) {
     stop(paste0(sQuote("noisevars"), " has to be a numeric value."))
   }
   
   # interaction
-  if(!is.numeric(interactions)) {
-    stop(paste0(sQuote("interactions"), " has to be a numeric vector"))
+  if(!is.numeric(interactions) | length(interactions) != 1) {
+    stop(paste0(sQuote("interactions"), " has to be a numeric value."))
+  }
+  
+  # categorical variables
+  if(length(catvars) != 2 | 
+     !is.numeric(catvars)) {
+    stop(paste0(sQuote("catvars"), "has to be a vector of length two which specifies",
+                " first the number of categorical features and second their", 
+                " respective number of classes."))
   }
   
   # signal to noise
-  if(!is.numeric(stn)) {
-    stop(paste0(sQuote("stn"), " has to be a numeric value."))
+  if(!is.numeric(stn) | 
+     any(stn > 1) | 
+     any(stn < 0)) {
+    stop(paste0(sQuote("stn"), "has to be a vector specifying a numeric range",
+                " (in [0,1]) or a single numeric."))
   }
   
   # nlfun
@@ -189,11 +209,6 @@ Xy <-       function(n = 1000,
                                " (in [0,1]) or a single numeric."))
   }
   
-  # plot
-  if(!is.logical(plot)) {
-    stop(paste0(sQuote("plot"), " has to be a boolean."))
-  }
-  
   # noise.coll
   if(!is.logical(noise.coll)) {
     stop(paste0(sQuote("noise.coll"), " has to be a boolean."))
@@ -201,109 +216,154 @@ Xy <-       function(n = 1000,
   
   # preliminaries ----
 
-  # features ----
+  # X_TRANS ----
   # handle noise collinearity
   if (noise.coll) {
     # dictionary
-    mapping <- c("NLIN" = numvars[2], 
-                 "LIN" = numvars[1],
-                 "NOISE" = noisevars)
+    mapping <- list("NLIN" = numvars[2], 
+                    "LIN" = numvars[1],
+                    "NOISE" = noisevars)
+    
     # handle wrong dimensionality due to noise variables
     n.coll <- noisevars
   } else {
     # dictionary
-    mapping <- c("NLIN" = numvars[2], "LIN" = numvars[1])
+    mapping <- list("NLIN" = numvars[2], 
+                    "LIN" = numvars[1])
     # handle wrong dimensionality due to noise variables
     n.coll <- 0
   }
  
   # total number of variables
-  vars <-  sum(mapping)
+  vars <-  Reduce("+", mapping)
  
-  # issue warning cov.mat ----
-  if(!is.null(cov.mat)) {
+  # issue warning sigma ----
+  if(!is.null(sigma)) {
     
-    cov.mat <- tryCatch({as.matrix(cov.mat)},
+    SIGMA <- tryCatch({as.matrix(sigma)},
                         error = function(e) return(NA))
     
-    if(is.na(cov.mat)) {
-      stop(paste0("Tried to coerce", sQuote("cov.mat"),
+    if(is.na(SIGMA)) {
+      stop(paste0("Tried to coerce", sQuote("sigma"),
                   " to a matrix, but could not succeed."))
     }
     
-    if(NCOL(cov.mat) != vars) {
+    if(NCOL(SIGMA) != vars) {
       stop(paste0("The user-specified covariance matrix",
                   " has insufficient columns: ",
-                  NCOL(cov.mat), " for ",
+                  NCOL(SIGMA), " for ",
                   vars, " variables. Reconsider ", 
-                  sQuote("cov.mat"), "."))
+                  sQuote("sigma"), "."))
     }
   }
   
   # handle covariance matrix
-  if (is.null(cov.mat)) {
+  if (is.null(sigma)) {
     # covariance
-    cov.mat <- matrix(runif(vars^2, min(cor), max(cor)),
+    SIGMA <- matrix(runif(vars^2, min(cor), max(cor)),
                       nrow = vars,
                       ncol = vars)
     # variance
-    diag(cov.mat) <- runif(NCOL(cov.mat),
+    diag(SIGMA) <- runif(NCOL(SIGMA),
                            min(sig),
                            max(sig))
   }
   
-  # sample features
-  FEATURES <- matrix(rnorm(n = n * vars, 
-                            mean = 0,
-                            sd = runif(1, min(sig), max(sig))),
-                      ncol = vars, nrow = n) %*%  chol(cov.mat)
-  
-  # create dummmy features
+  # sample and rotate X
+  X <- matrix(rnorm(n = n * vars, 
+                    mean = 0,
+                    sd = runif(1, min(sig), max(sig))),
+              ncol = vars, 
+              nrow = n) %*% chol(SIGMA)
+
+  # create dummmy X_TRANS
   if (catvars[1] > 0) {
 
-  DUMMIES <- do.call("data.frame", lapply(rep(list(seq_len(catvars[2])), 
+  X_DUM_RAW <- do.call("data.frame", lapply(rep(list(seq_len(catvars[2])), 
                                           catvars[1]), 
                                           FUN = sample, 
                                           replace = TRUE,
-                                          size = nrow(FEATURES), 
+                                          size = nrow(X), 
                                           prob = runif(catvars[2], 0, 1)))
+  
+  # save names
+  names(X_DUM_RAW) <- paste0("DUMMY_", 1:ncol(X_DUM_RAW))
+  
   # factorize
-  DUMMIES <- data.frame(sapply(DUMMIES, factor))
-  colnames(DUMMIES) <- paste0("DUMMY_", formatC(seq_len(catvars[1]),
+  X_DUM <- data.frame(sapply(X_DUM_RAW, factor))
+  colnames(X_DUM) <- paste0("DUMMY_", formatC(seq_len(catvars[1]),
                                                 max(nchar(c(noisevars,
-                                                            mapping, 
+                                                            do.call("c", mapping), 
                                                             catvars[1])))-1,
                                              flag = "0"))
   
   # bind model matrix
-  DUMMIES <- do.call("data.frame", lapply(seq_along(DUMMIES), FUN = function(i,x) {
+  X_DUM <- do.call("data.frame", lapply(seq_along(X_DUM), FUN = function(i,x) {
                                           the_name <- names(x)[i]
                                           OUT <- model.matrix(~ . -1, data = data.frame(x[, i]))
                                           colnames(OUT) <- paste0(the_name, "__", 1:ncol(OUT))
                                           return(OUT)
-                                          }, x = DUMMIES))
-  # weights
-  dw.mat <- diag(round(runif(ncol(DUMMIES), min(weights), max(weights)), 2))
+                                          }, x = X_DUM))
+  # draw weights
+  DW <- diag(round(runif(ncol(X_DUM), min(weights), max(weights)), 2))
   }
+
+  # set X_TRANS as data.table
+  X_TRANS <- X <- data.table(X)
   
-  # copy features
-  VARS <- FEATURES[, 1:(vars-n.coll)]
-  
-  # set features as data.table
-  FEATURES <- data.table(FEATURES)
+  # set names
+  names(X_TRANS) <- names(X) <- set_var_name(mapping, c(mapping, noisevars))
   
   # transform nonlinear part
   if (numvars[2] > 0) {
-    VARS[, 1:numvars[2]] <- apply(VARS[, 1:numvars[2]],
-                                MARGIN = 2,
-                                FUN = nlfun)
+    nlins <- grep("NLIN", names(X_TRANS), value = TRUE)
+    X_TRANS[, c(nlins) := lapply(.SD, nlfun), .SDcols = nlins]
   }
   
+  # manage interactions ----
+  # interaction matrix raw (no interactions)
+  INT <- diag(round(runif(vars-n.coll, min(weights), max(weights)), 2))
+  
+  # sample interactions
+  if (interactions[1] > 1) {
+    INT <- add_interactions(INT, weights, interactions[1])
+  }
+  
+  # extract the target generating process
+  int_raw <- sapply(seq_len(NCOL(INT)),
+                    FUN = ext_name,
+                    x = INT,
+                    var = names(X_TRANS)[seq_len(NCOL(INT))])
+  
+  # fix negative terms
+  int_raw[grep("-", int_raw)] <- gsub("(.*)", "\\(\\1\\)", int_raw[grep("-", int_raw)])
+  # create target ----
+  X_TRANS[, c(names(X_TRANS)) := lapply(.SD, scale,
+                                      center = TRUE, 
+                                      scale = TRUE), .SDcols = names(X_TRANS)]
 
-  # set names
-  names(FEATURES) <- unlist(sapply(seq_len(length(mapping)),
-                                   set.var.name, x = mapping,
-                                   noisevars = noisevars))
+  target <- as.matrix(X_TRANS[, c(!grepl("NOISE", names(X_TRANS))), with = FALSE]) %*%
+                      INT %*%
+                      rep(1, NCOL(INT))
+  
+  # add dummy effects
+  if (catvars[1] > 0) {
+    ref_class <- !grepl("*__1", names(X_DUM))
+    
+    target <- target + as.matrix(X_DUM[, ref_class]) %*% 
+                                          DW[ref_class, ref_class] %*% 
+                                                    rep(1, sum(ref_class))  
+    
+    # set reference classes to zero
+    DW[!ref_class, !ref_class] <- 0
+    # create effect description
+    dw_raw <- paste0(diag(DW)[ref_class], names(X_DUM)[ref_class])
+    # fix negative terms
+    dw_raw[grep("-", dw_raw)] <- gsub("(.*)", "\\(\\1\\)", dw_raw[grep("-", dw_raw)])
+    X <- data.table(cbind(X, X_DUM))
+  } else {
+    dw_raw <- NULL
+  }
   
   # noise ----
   if (noisevars > 0 && !noise.coll) {
@@ -314,90 +374,40 @@ Xy <-       function(n = 1000,
     # fix diagonal
     diag(S) <- runif(NCOL(S), min(sig), max(sig))
     
-    noise.mat <-  data.table(matrix(rnorm(n * noisevars),
-                                    ncol = noisevars, nrow = n) %*%  chol(S))
+    E <-  data.table(matrix(rnorm(n * noisevars),
+                            ncol = noisevars, nrow = n) %*%  chol(S))
     
-    names(noise.mat) <- paste0("NOISE_",
-                               formatC(seq_len(noisevars), 
-                                       width = nchar(noisevars),
-                                       flag = "0"))
+    names(E) <- paste0("NOISE_",
+                       formatC(seq_len(noisevars), 
+                               width = nchar(max(do.call("c", mapping), noisevars)),
+                               flag = "0"))
     
-    FEATURES <- cbind(FEATURES, noise.mat)
-  }
-  
-  # manage interactions ----
-  # interaction matrix raw (no interactions)
-  int.mat <- diag(round(runif(vars-n.coll, min(weights), max(weights)), 2))
-  
-  # sample interactions
-  if (interactions[1] > 1) {
-    int.mat <- add.interactions(int.mat, weights, interactions[1])
-  }
-  
-  # extract the target generating process
-  int.raw <- sapply(seq_len(NCOL(int.mat)-n.coll),
-                    FUN = ext.name,
-                    x = int.mat,
-                    var = names(FEATURES)[seq_len(NCOL(int.mat))])
-  
-  # fix negative terms
-  int.raw[grep("-", int.raw)] <- gsub("(.*)", "\\(\\1\\)", int.raw[grep("-", int.raw)])
-  
-  # create target ----
-  VARS <- apply(VARS, scale, center = TRUE, scale = TRUE, MARGIN = 2)
-
-  target <- VARS %*%
-              int.mat %*%
-                  rep(1, NCOL(int.mat))
-  
-  # add dummy effects
-  if (catvars[1] > 0) {
-    if (intercept) {
-      ref_class <- !grepl("*__1", names(DUMMIES))
-    } else {
-      ref_class <- rep(TRUE, ncol(DUMMIES))
-    }
-    target <- target + as.matrix(DUMMIES[, ref_class]) %*% dw.mat[, ref_class] %*% rep(1, NCOL(dw.mat))  
-    dw.raw <- paste0(diag(dw.mat)[ref_class], names(DUMMIES)[ref_class])
-    # fix negative terms
-    dw.raw[grep("-", dw.raw)] <- gsub("(.*)", "\\(\\1\\)", dw.raw[grep("-", dw.raw)])
-    FEATURES <- cbind(FEATURES, DUMMIES)
-  } else {
-    dw.raw <- NULL
+    X <- cbind(X, E)
   }
   
   # add intercept
   if (intercept) {
-  int <-  runif(1, quantile(target, 0.25), quantile(target, 0.75))
-  int.paste <- paste0("y = ", round(int, 3), " + ")
-  target <- target + int
+  i_cept <-  runif(1, quantile(target, 0.25), quantile(target, 0.75))
+  i_cept_paste <- paste0("y = ", round(i_cept, 3), " + ")
+  target <- target + i_cept
   } else {
-  int.paste <- "y = "
+  i_cept_paste <- "y = "
   }
   
   # add noise
-  noise <- sd(target)*stn
+  noise <- sd(target)*(1-stn)
   target <- target + rnorm(n, 0, noise)
   
-  # add to features
-  FEATURES[, y := target]
+  # add to X_TRANS
+  X_TRANS[, y := target]
+  X[, y := target]
   
-  # classification
-  if (type == "classification") {
-  # logit link
-  FEATURES[, y := exp(target) / (1 + exp(target))]
-  FEATURES[, y := ifelse(y >= 0.5, 1, 0)]
-  }
-  
-  # multiclassification
-  #if (type == "multiclass") {
-  # logit link
-  #FEATURES[, y := exp(target) / (1 + exp(target))]
-  #FEATURES[, y := cut(y, seq(0,1, 1/classes))]
-  #}
-  
+  # transform target according to family
+  X[, y := family$link(y)]
+  X[, y := family$cutoff(y)]
+
   # describe y
-  dgp <- paste0(int.paste, paste0(c(int.raw, dw.raw), collapse = " + "))
+  dgp <- paste0(i_cept_paste, paste0(c(int_raw, dw_raw), collapse = " + "))
   
   # fix - terms
   dgp <- gsub(" \\+ \\(-", " - ", dgp)
@@ -408,25 +418,46 @@ Xy <-       function(n = 1000,
   # add error
   dgp <- paste0(dgp, " + e ~ N(0,", round(noise, 2),")")
   
-  # plot true effects
-  if (plot) {
-    
-    plot.dat <- FEATURES[, -grep("NOISE|DUMMY", names(FEATURES)), with = FALSE]
-    melted.dat <- melt(plot.dat, "y")
-    melted.dat <- melted.dat[order(value),  .SD, by = variable]
-    plot <- ggplot(melted.dat, aes(x = value, y = y)) + 
-                geom_point(colour = "#13235B") + 
-                facet_wrap( ~ variable, scale = "free") + 
-                theme_minimal(base_size = 14) +
-                xlab("") +
-                ggtitle("True effects X vs y") +
-                geom_smooth(method = "loess", colour = "#00C792")
+  # create the transformation matrix
+  psi <- list()
+  # add intercept
+  if (intercept) {
+    psi[[1]] <- i_cept
+  } 
+  # linear and nonlinear variabels
+  psi[[2]] <- INT
+  # catigorical variables
+  if (catvars[1] > 0) {
+  psi[[3]] <- DW
   }
+  # noise variables
+  if (noisevars > 0) {
+  psi[[4]] <- diag(noisevars)
+  }
+  # target
+  psi[[5]] <- 1
+  
+  # include intercept
+  if (intercept) {
+    X <- cbind(data.table("(Intercept)" = 1), X)
+  }
+
+  # create the block diagonal transformation matrix
+  psi <- Matrix::.bdiag(psi[!sapply(psi, is.null)])
+  
+  # setting names
+  colnames(psi) <- names(X)
+  
+  # add class
+  OUT <- list(data = na.omit(X), 
+              psi = psi,
+              family = family,
+              dgp = dgp,
+              control = input)
+  
+  class(OUT) <- "Xy_sim"
   
   # return ----
-  return(list(data = na.omit(FEATURES), 
-              dgp = dgp, 
-              control = input,
-              plot = plot))
+  return(OUT)
 }
   
