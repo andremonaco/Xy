@@ -1,6 +1,6 @@
-#' Xy Family 
+#' Xy Task 
 #'
-#' This function creates a family list. Functions within this list are used to
+#' This function creates a task list. Functions within this list are used to
 #' transform the target variable of
 #' @param name the name of the learning task
 #' @param link a link function to be used to transform the target
@@ -17,8 +17,8 @@
 #' # Regression
 #' # In the regression case the link function is the identity link which
 #' # means no transformation at all
-#' my_regression_family <- Xy_family(name = "regression")
-Xy_family <- function(name = "regression",
+#' my_regression_task <- Xy_task(name = "regression")
+Xy_task <- function(name = "regression",
                       link = NULL,
                       cutoff = NULL) {
   OUT <- list()
@@ -82,7 +82,7 @@ Xy_family <- function(name = "regression",
            if(any(null_check)) { 
               stop(paste0("You have to specify a ",
                           paste0(c("cutoff", "link")[null_check], collapse = " and a "),
-                          " function for your custom family. ",
+                          " function for your custom task. ",
                           "If you do not want to use this specify: ",
                           sQuote(paste0(paste0(c("cutoff", "link")[null_check], collapse = " = "), " = function(x) x"))))
            }

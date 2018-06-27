@@ -18,10 +18,10 @@ print.Xy_sim <- function(x, ...) {
   # summary ----
   cat(paste0("Xy Simulation \n"))
   cat(paste0(" \t | \n"))
-  cat(paste0(" \t | + family ", x$family$name, "\n"))
+  cat(paste0(" \t | + task ", x$task$name, "\n"))
   cat(paste0(" \t | + observations ", x$control$n, "\n"))
   cat(paste0(" \t | + interactions ", x$control$interactions, "D", "\n"))
-  cat(paste0(" \t | + signal ", (x$control$stn)*100, " %", " -- noise ", (1-x$control$stn)*100, " %",  "\n"))
+  cat(paste0(" \t | + signal to noise ratio ", x$control$stn, "\n"))
   
   # effects -----
   cat(paste0(" \t | + effects \n"))
@@ -53,9 +53,11 @@ print.Xy_sim <- function(x, ...) {
   
   cat(paste0("\n"))
   cat(paste0("\n"))
-  cat(paste0("Data generating process: \n"))
+  cat(paste0("Target generating process: \n"))
   # data generating process ----
-  cat(paste0(x$dgp))
+  cat(paste0(x$tgp))
+  
+  return(invisible())
 }
 
 # COEF --------------------------------------------------------------------
@@ -102,6 +104,7 @@ plot.Xy_sim <- function(x, ...) {
     geom_smooth(method = "loess", colour = "#00C792")
   
   print(effects_plt)
+  return(effects_plt)
 }
 
 

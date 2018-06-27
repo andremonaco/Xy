@@ -34,7 +34,7 @@
 #' @param interactions a vector of integer specifying the interaction depth of
 #'                    of regular X and autoregressive X if
 #'                    applicable.
-#' @param family a Xy family object as created with \code{\link{Xy_family}}
+#' @param task a Xy task object as created with \code{\link{Xy_task}}
 #' @param sig a vector c(min, max) indicating the scale parameter to sample from
 #' @param cor a vector c(min, max) determining correlation to sample from.
 #' @param weights a vector c(min, max) specifying 
@@ -42,13 +42,13 @@
 #' @param sigma a covariance matrix for the linear and nonlinear simulation.
 #'                Defaults to \code{NULL} which means the structure
 #'                will be sampled from \code{cor}
-#' @param stn a numeric value determining the signal to noise ratio. Should be within the interval [0, 1].
+#' @param stn an integer value determining the signal to noise ratio.
 #'            Higher values lead to more signal and less noise.
 #' @param noise.coll a boolean determining noise collinearity with X
 #' @param intercept a boolean indicating whether an intercept should enter the model
 #' 
 #' @import data.table ggplot2 gridExtra Matrix
-#' @importFrom stats model.matrix na.omit quantile rnorm runif sd formula
+#' @importFrom stats model.matrix na.omit quantile rnorm runif sd formula var
 #' @importFrom Matrix .bdiag
 #' 
 #' @exportClass Xy_sim
@@ -58,7 +58,7 @@
 #' @return a list with the following entries
 #' \itemize{
 #' \item \code{data} - the simulated data.table
-#' \item \code{dgp} - the data generating process as a string
+#' \item \code{tgp} - the target generating process as a string
 #' \item \code{psi} - psi is a transformation matrix which transforms the raw data
 #'                    (stored in $data) to the true effects. However, you have to
 #'                    apply the nonlinear functions upfront. If you want to transform
@@ -76,14 +76,14 @@ Xy <-       function(n = 1000,
                      numvars = c(2, 2),
                      catvars = c(1, 2),
                      noisevars = 5,
-                     family = Xy_family(),
+                     task = Xy_task(),
                      nlfun = function(x) x^2,
                      interactions = 1,
                      sig = c(1,10), 
-                     cor = c(0.1,0.3),
+                     cor = c(0, 0.1),
                      weights = c(5,10),
                      sigma = NULL,
-                     stn = 0.95,
+                     stn = 4,
                      noise.coll = FALSE,
                      intercept = TRUE
                      ) {
@@ -169,17 +169,20 @@ Xy <-       function(n = 1000,
   # categorical variables
   if(length(catvars) != 2 | 
      !is.numeric(catvars)) {
-    stop(paste0(sQuote("catvars"), "has to be a vector of length two which specifies",
-                " first the number of categorical features and second their", 
-                " respective number of classes."))
+    if (is.numeric(catvars) && catvars == 0) {
+      catvars <- c(0,0)
+    } else {
+      stop(paste0(sQuote("catvars"), " has to be a vector of length two which specifies",
+                  " first the number of categorical features and second their", 
+                  " respective number of classes."))
+    }
   }
   
   # signal to noise
   if(!is.numeric(stn) | 
-     any(stn > 1) | 
-     any(stn < 0)) {
-    stop(paste0(sQuote("stn"), "has to be a vector specifying a numeric range",
-                " (in [0,1]) or a single numeric."))
+     length(stn) != 1 ||
+     stn <= 0) {
+    stop(paste0(sQuote("stn"), "has to be a positive numeric value"))
   }
   
   # nlfun
@@ -255,18 +258,36 @@ Xy <-       function(n = 1000,
                   vars, " variables. Reconsider ", 
                   sQuote("sigma"), "."))
     }
+    
+    # try decomposition
+    chol_SIGMA <- tryCatch({chol(SIGMA)}, error = function(e) return(FALSE))
+    if (length(chol_SIGMA) == 1 && !chol_SIGMA) {
+      stop(paste0("Could not calculate the cholesky decomposition",
+                  "of the covariance matrix. ",
+                  " Try respecifying your desired covariance matrix."))
+    }
+    
   }
   
   # handle covariance matrix
   if (is.null(sigma)) {
+    
     # covariance
+    for (i in 1:20) {
     SIGMA <- matrix(runif(vars^2, min(cor), max(cor)),
-                      nrow = vars,
-                      ncol = vars)
+                    nrow = vars,
+                    ncol = vars)
     # variance
-    diag(SIGMA) <- runif(NCOL(SIGMA),
-                           min(sig),
-                           max(sig))
+    diag(SIGMA) <- 1
+    chol_SIGMA <- tryCatch({chol(SIGMA)}, error = function(e) return(FALSE))
+    
+    if (is.matrix(chol_SIGMA)) break
+    }
+    if (length(chol_SIGMA) == 1 && !chol_SIGMA) {
+      stop(paste0("Could not calculate the cholesky decomposition",
+                  "of the covariance matrix. ",
+                  " Try respecifying your desired correlation interval."))
+    }
   }
   
   # sample and rotate X
@@ -274,7 +295,7 @@ Xy <-       function(n = 1000,
                     mean = 0,
                     sd = runif(1, min(sig), max(sig))),
               ncol = vars, 
-              nrow = n) %*% chol(SIGMA)
+              nrow = n) %*% chol_SIGMA
 
   # create dummmy X_TRANS
   if (catvars[1] > 0) {
@@ -337,11 +358,8 @@ Xy <-       function(n = 1000,
   
   # fix negative terms
   int_raw[grep("-", int_raw)] <- gsub("(.*)", "\\(\\1\\)", int_raw[grep("-", int_raw)])
+  
   # create target ----
-  X_TRANS[, c(names(X_TRANS)) := lapply(.SD, scale,
-                                      center = TRUE, 
-                                      scale = TRUE), .SDcols = names(X_TRANS)]
-
   target <- as.matrix(X_TRANS[, c(!grepl("NOISE", names(X_TRANS))), with = FALSE]) %*%
                       INT %*%
                       rep(1, NCOL(INT))
@@ -395,28 +413,29 @@ Xy <-       function(n = 1000,
   }
   
   # add noise
-  noise <- sd(target)*(1-stn)
-  target <- target + rnorm(n, 0, noise)
+  noise_n <- rnorm(n)
+  noise <- noise_n * as.vector(sqrt(var(target)/(stn*var(noise_n))))
+  target <- target + noise
   
   # add to X_TRANS
   X_TRANS[, y := target]
   X[, y := target]
   
-  # transform target according to family
-  X[, y := family$link(y)]
-  X[, y := family$cutoff(y)]
+  # transform target according to task
+  tryCatch({X[, y := task$link(y)]}, error = function(e) stop("Could not apply link function."))
+  tryCatch({X[, y := task$cutoff(y)]}, error = function(e) stop("Could not apply cutoff function."))
 
   # describe y
-  dgp <- paste0(i_cept_paste, paste0(c(int_raw, dw_raw), collapse = " + "))
+  tgp <- paste0(i_cept_paste, paste0(c(int_raw, dw_raw), collapse = " + "))
   
   # fix - terms
-  dgp <- gsub(" \\+ \\(-", " - ", dgp)
+  tgp <- gsub(" \\+ \\(-", " - ", tgp)
   
   # fix brackets
-  dgp <- gsub("\\)|\\(", "", dgp)
+  tgp <- gsub("\\)|\\(", "", tgp)
   
   # add error
-  dgp <- paste0(dgp, " + e ~ N(0,", round(noise, 2),")")
+  tgp <- paste0(tgp, " + e ~ N(0,", round(sd(noise), 2),")")
   
   # create the transformation matrix
   psi <- list()
@@ -451,8 +470,8 @@ Xy <-       function(n = 1000,
   # add class
   OUT <- list(data = na.omit(X), 
               psi = psi,
-              family = family,
-              dgp = dgp,
+              task = task,
+              tgp = tgp,
               control = input)
   
   class(OUT) <- "Xy_sim"

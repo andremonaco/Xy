@@ -9,9 +9,9 @@
 \title{Xy}
 \usage{
 Xy(n = 1000, numvars = c(2, 2), catvars = c(1, 2), noisevars = 5,
-  family = Xy_family(), nlfun = function(x) x^2, interactions = 1,
-  sig = c(1, 10), cor = c(0.1, 0.3), weights = c(5, 10), sigma = NULL,
-  stn = 0.95, noise.coll = FALSE, intercept = TRUE)
+  task = Xy_task(), nlfun = function(x) x^2, interactions = 1,
+  sig = c(1, 10), cor = c(0, 0.1), weights = c(5, 10), sigma = NULL,
+  stn = 4, noise.coll = FALSE, intercept = TRUE)
 
 \method{print}{Xy_sim}(x, ...)
 
@@ -36,7 +36,7 @@ two categorical variables with five categories.}
 
 \item{noisevars}{an integer determining the number of noise variables}
 
-\item{family}{a Xy family object as created with \code{\link{Xy_family}}}
+\item{task}{a Xy task object as created with \code{\link{Xy_task}}}
 
 \item{nlfun}{a function transforming nonlinear variables}
 
@@ -55,7 +55,7 @@ the multiplication magnitude to sample from}
 Defaults to \code{NULL} which means the structure
 will be sampled from \code{cor}}
 
-\item{stn}{a numeric value determining the signal to noise ratio. Should be within the interval [0, 1].
+\item{stn}{an integer value determining the signal to noise ratio.
 Higher values lead to more signal and less noise.}
 
 \item{noise.coll}{a boolean determining noise collinearity with X}
@@ -74,7 +74,7 @@ Higher values lead to more signal and less noise.}
 a list with the following entries
 \itemize{
 \item \code{data} - the simulated data.table
-\item \code{dgp} - the data generating process as a string
+\item \code{tgp} - the target generating process as a string
 \item \code{psi} - psi is a transformation matrix which transforms the raw data
                    (stored in $data) to the true effects. However, you have to
                    apply the nonlinear functions upfront. If you want to transform
