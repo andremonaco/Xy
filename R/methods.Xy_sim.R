@@ -3,7 +3,7 @@
 #' @param x an object of class \code{Xy_sim}.
 #' @param object an object of class \code{Xy_sim}.
 #' @param _data an object of class \code{Xy_sim}.
-#' @param ... arguments to be passed to methods
+#' @param ... arguments to be passed to method
 #' @rdname Xy
 #' @method print Xy_sim
 #' @export
@@ -69,8 +69,6 @@ print.Xy_sim <- function(x, ...) {
 #' # Extracting the weights
 #' coef(my_simulation)
 coef.Xy_sim <- function(object, ...) {
-  if(!inherits(object, "Xy_sim")) 
-    stop(paste0("object must be of class ", sQuote('Xy_sim')))
   coefs <- diag(as.matrix(object$psi))
   coefs <- coefs[!grepl("y|NOISE", colnames(object$psi))]
   names(coefs) <- colnames(object$psi)[!grepl("y|NOISE", colnames(object$psi))]
@@ -87,9 +85,6 @@ coef.Xy_sim <- function(object, ...) {
 #' # Plotting the true underlying effects
 #' plot(my_simulation)
 plot.Xy_sim <- function(x, ...) {
-  if(!inherits(x, "Xy_sim")) 
-    stop(paste0("x must be of class ", sQuote('Xy_sim')))
-  
   # get data
   X <- x$data
 
@@ -117,20 +112,75 @@ plot.Xy_sim <- function(x, ...) {
 #' # Getting the true underlying data of the process
 #' transform(my_simulation)
 transform.Xy_sim <- function(`_data`, ...) {
-  if(!inherits(`_data`, "Xy_sim")) 
-    stop(paste0("`_data` must be of class ", sQuote('Xy_sim')))
-  
   # get data
-  X <- `_data`$data
+  X <- copy(`_data`$data)
   nlins <- grep("NLIN", names(X), value = TRUE)
   
   # transform nonlinear columns
   if (length(nlins) > 1) {
   X[, c(nlins) := lapply(.SD, FUN = `_data`$control$nlfun), .SDcols = nlins]
-  X[, c(nlins) := lapply(.SD, FUN = scale, center = TRUE, scale = TRUE), .SDcols = nlins]
   }
   
   # add weights
   X <- data.table(as.matrix(as.matrix(X) %*% `_data`$psi))
   return(X)
+}
+
+
+# FEATURE IMPORTANCE ------------------------------------------------------
+
+#' Variable Importance
+#' @param object an object of class \code{Xy_sim}
+#' @param use.noise a boolean indicating whether the noise of the process should
+#'                  be added to the variable importance
+#' @export
+#' @examples
+#' # Visualize Feature Importance of a Simulation
+#' my_simulation <- Xy()
+#' varimp(my_simulation)
+varimp <- function(object, use.noise = FALSE) {
+  # transform the data
+  trans <- transform(object)
+  # exclude
+  pattern <- "[^(NOISE_[:digit:])|y]"
+  vars <- grep(pattern, names(trans), value = TRUE)
+  # calculate e
+  trans[, noise := y-rowSums(.SD), .SDcols = vars]
+  
+  # should the noise be added to the variable importance
+  if (use.noise) {
+    vars <- grep(pattern, names(trans), value = TRUE)
+  }
+  
+  # calculate importance contribution
+  trans[, c(vars) := abs(.SD) / rowSums(abs(.SD)), .SDcols = vars]
+  
+  # subset dummies
+  if (any(colSums(trans)==0)) {
+    vars <- setdiff(vars, names(which(colSums(trans)==0)))
+  }
+  
+  # feature importance (table)
+  imp_raw <- copy(trans[, .SD, .SDcols = vars])
+  imp <- imp_raw[, list(IMPORTANCE_MEAN = as.numeric(lapply(.SD, mean)),
+                        IMPORTANCE_MEDIAN = as.numeric(lapply(.SD, median)),
+                        IMPORTANCE_SD = as.numeric(lapply(.SD, sd)),
+                        IMPORTANCE_MAD = as.numeric(lapply(.SD, mad))), .SDcols = names(imp_raw)]
+  imp <- cbind(FEATURES = names(imp_raw), imp)
+  imp <- imp[order(imp$IMPORTANCE_MEAN, decreasing = TRUE) ,]
+  
+  # create plot
+  imp_df <- suppressWarnings(melt(imp_raw))
+  p <- ggplot(imp_df, aes(y = value, x = reorder(variable, value, median))) +
+    stat_boxplot(geom='errorbar', linetype="longdash", width= 0.3) +
+    geom_boxplot(outlier.color = "#F25D57", 
+                 colour = "#13235B",
+                 outlier.shape = 15,
+                 outlier.alpha = 0.3) + 
+    coord_flip() + 
+    theme_minimal(base_size = 14) +
+    ylab("Importance") + xlab("")
+  print(p)
+  
+  return(imp)
 }

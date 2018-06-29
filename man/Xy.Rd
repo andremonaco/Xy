@@ -64,7 +64,7 @@ Higher values lead to more signal and less noise.}
 
 \item{x}{an object of class \code{Xy_sim}.}
 
-\item{...}{arguments to be passed to methods}
+\item{...}{arguments to be passed to method}
 
 \item{object}{an object of class \code{Xy_sim}.}
 

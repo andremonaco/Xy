@@ -48,7 +48,8 @@
 #' @param intercept a boolean indicating whether an intercept should enter the model
 #' 
 #' @import data.table ggplot2 Matrix
-#' @importFrom stats model.matrix na.omit quantile rnorm runif sd formula var
+#' @importFrom stats model.matrix na.omit quantile rnorm 
+#'                   runif sd formula var median mad reorder
 #' @importFrom Matrix .bdiag
 #' 
 #' @exportClass Xy_sim
@@ -297,40 +298,10 @@ Xy <-       function(n = 1000,
               ncol = vars, 
               nrow = n) %*% chol_SIGMA
 
-  # create dummmy X_TRANS
-  if (catvars[1] > 0) {
-
-  X_DUM_RAW <- do.call("data.frame", lapply(rep(list(seq_len(catvars[2])), 
-                                          catvars[1]), 
-                                          FUN = sample, 
-                                          replace = TRUE,
-                                          size = nrow(X), 
-                                          prob = runif(catvars[2], 0, 1)))
-  
-  # save names
-  names(X_DUM_RAW) <- paste0("DUMMY_", 1:ncol(X_DUM_RAW))
-  
-  # factorize
-  X_DUM <- data.frame(sapply(X_DUM_RAW, factor))
-  colnames(X_DUM) <- paste0("DUMMY_", formatC(seq_len(catvars[1]),
-                                                max(nchar(c(noisevars,
-                                                            do.call("c", mapping), 
-                                                            catvars[1])))-1,
-                                             flag = "0"))
-  
-  # bind model matrix
-  X_DUM <- do.call("data.frame", lapply(seq_along(X_DUM), FUN = function(i,x) {
-                                          the_name <- names(x)[i]
-                                          OUT <- model.matrix(~ . -1, data = data.frame(x[, i]))
-                                          colnames(OUT) <- paste0(the_name, "__", 1:ncol(OUT))
-                                          return(OUT)
-                                          }, x = X_DUM))
-  # draw weights
-  DW <- diag(round(runif(ncol(X_DUM), min(weights), max(weights)), 2))
-  }
 
   # set X_TRANS as data.table
-  X_TRANS <- X <- data.table(X)
+  X <- data.table(X)
+  X_TRANS <- copy(X)
   
   # set names
   names(X_TRANS) <- names(X) <- set_var_name(mapping, c(mapping, noisevars))
@@ -363,7 +334,40 @@ Xy <-       function(n = 1000,
   target <- as.matrix(X_TRANS[, c(!grepl("NOISE", names(X_TRANS))), with = FALSE]) %*%
                       INT %*%
                       rep(1, NCOL(INT))
+
+  # create dummmy X_TRANS
+  if (catvars[1] > 0) {
+    
+    X_DUM_RAW <- do.call("data.frame", lapply(rep(list(seq_len(catvars[2])), 
+                                                  catvars[1]), 
+                                              FUN = sample, 
+                                              replace = TRUE,
+                                              size = nrow(X), 
+                                              prob = runif(catvars[2], 0, 1)))
+    
+    # save names
+    names(X_DUM_RAW) <- paste0("DUMMY_", 1:ncol(X_DUM_RAW))
+    
+    # factorize
+    X_DUM <- data.frame(sapply(X_DUM_RAW, factor))
+    colnames(X_DUM) <- paste0("DUMMY_", formatC(seq_len(catvars[1]),
+                                                max(nchar(c(noisevars,
+                                                            do.call("c", mapping), 
+                                                            catvars[1])))-1,
+                                                flag = "0"))
+    
+    # bind model matrix
+    X_DUM <- do.call("data.frame", lapply(seq_along(X_DUM), FUN = function(i,x) {
+      the_name <- names(x)[i]
+      OUT <- model.matrix(~ . -1, data = data.frame(x[, i]))
+      colnames(OUT) <- paste0(the_name, "__", 1:ncol(OUT))
+      return(OUT)
+    }, x = X_DUM))
+    # draw weights
+    DW <- diag(round(mean(target)*runif(ncol(X_DUM), 0.01, 1), 2))
+  }
   
+    
   # add dummy effects
   if (catvars[1] > 0) {
     ref_class <- !grepl("*__1", names(X_DUM))
@@ -405,7 +409,7 @@ Xy <-       function(n = 1000,
   
   # add intercept
   if (intercept) {
-  i_cept <-  runif(1, quantile(target, 0.25), quantile(target, 0.75))
+  i_cept <-  mean(target)*runif(1, 0.01, 1)
   i_cept_paste <- paste0("y = ", round(i_cept, 3), " + ")
   target <- target + i_cept
   } else {

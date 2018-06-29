@@ -14,4 +14,4 @@ jobs:
             R -e 'devtools::check()'
       - run:
           command: |
-            R -e 'devtools::install_github('andrebleier/Xy')'
+            R -e 'devtools::install_github("andrebleier/Xy")'
