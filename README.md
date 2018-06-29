@@ -1,4 +1,5 @@
-Simulating Supervised Learning Data
+Simulating Supervised Learning Data 
+[![CircleCI](https://circleci.com/gh/andrebleier/Xy.svg?style=svg)](https://circleci.com/gh/andrebleier/Xy)
 ===================================
 
 With `Xy()` you can convienently simulate regression data. The simulation can be
