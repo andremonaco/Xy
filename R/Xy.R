@@ -47,7 +47,7 @@
 #' @param noise.coll a boolean determining noise collinearity with X
 #' @param intercept a boolean indicating whether an intercept should enter the model
 #' 
-#' @import data.table ggplot2 gridExtra Matrix
+#' @import data.table ggplot2 Matrix
 #' @importFrom stats model.matrix na.omit quantile rnorm runif sd formula var
 #' @importFrom Matrix .bdiag
 #' 
