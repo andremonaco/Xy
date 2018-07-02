@@ -1,4 +1,6 @@
-Simulating Supervised Learning Data
+[![CircleCI](https://circleci.com/gh/andrebleier/Xy.svg?style=svg)](https://circleci.com/gh/andrebleier/Xy)
+
+Simulating Supervised Learning Data 
 ===================================
 
 With `Xy()` you can convienently simulate regression data. The simulation can be
@@ -21,3 +23,4 @@ my_simulation <- Xy()
 ```
 
 Feel free to [contact](mailto:andre.bleier@statworx.com) me with input, ideas or some dank memes.
+
