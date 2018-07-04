@@ -80,14 +80,14 @@ Xy <-       function(n = 1000,
                      task = Xy_task(),
                      nlfun = function(x) x^2,
                      interactions = 1,
-                     sig = c(1,10), 
+                     sig = c(1,1), 
                      cor = c(0, 0.1),
                      weights = c(5,10),
                      sigma = NULL,
                      stn = 4,
                      noise.coll = FALSE,
                      intercept = TRUE
-                     ) {
+) {
   
   # save input
   input <- as.list(environment())
@@ -127,10 +127,10 @@ Xy <-       function(n = 1000,
   set_var_name <- function(x, full) {
     OUT <- c()
     for (i in seq_along(x)) {
-    if (x[i] == 0) next
-     OUT <- c(OUT, paste0(names(x)[i], "_", formatC(seq_len(x[[i]]),
-                                                 width = nchar(max(do.call("c", full))),
-                                                 flag = "0")))
+      if (x[i] == 0) next
+      OUT <- c(OUT, paste0(names(x)[i], "_", formatC(seq_len(x[[i]]),
+                                                     width = nchar(max(do.call("c", full))),
+                                                     flag = "0")))
     }
     return(OUT)
   }
@@ -149,12 +149,12 @@ Xy <-       function(n = 1000,
   # insufficient length
   if(length(numvars) != 2) {
     if (length(numvars) > 2) {
-    numvars <- numvars[1:2]
+      numvars <- numvars[1:2]
     } else {
-    numvars <- c(numvars, 0)
+      numvars <- c(numvars, 0)
     }
     warning(paste0(sQuote("numvars"), " has to be of length two. Following settings ",
-                  "are used: Linear (", numvars[1], ") and nonlinear (", numvars[2], ")"))
+                   "are used: Linear (", numvars[1], ") and nonlinear (", numvars[2], ")"))
   }
   
   # noisevars
@@ -194,14 +194,14 @@ Xy <-       function(n = 1000,
   # sig
   if(!length(sig) %in% c(1,2)) {
     stop(paste0(sQuote("sig"), " has to be either a vector of numeric values",
-                               " specifying variance boundries or a numeric value."))
+                " specifying variance boundries or a numeric value."))
   }
   
   # weights
   if(!length(weights) %in% c(1,2) | 
      !is.numeric(weights)) {
     stop(paste0(sQuote("weights"), "has to be a vector specifying a numeric range",
-                               " or a single numeric."))
+                " or a single numeric."))
   }
   
   # weights
@@ -210,7 +210,7 @@ Xy <-       function(n = 1000,
      any(cor > 1) | 
      any(cor < 0)) {
     stop(paste0(sQuote("cor"), "has to be a vector specifying a numeric range",
-                               " (in [0,1]) or a single numeric."))
+                " (in [0,1]) or a single numeric."))
   }
   
   # noise.coll
@@ -219,7 +219,7 @@ Xy <-       function(n = 1000,
   }
   
   # preliminaries ----
-
+  
   # X_TRANS ----
   # handle noise collinearity
   if (noise.coll) {
@@ -237,15 +237,15 @@ Xy <-       function(n = 1000,
     # handle wrong dimensionality due to noise variables
     n.coll <- 0
   }
- 
+  
   # total number of variables
   vars <-  Reduce("+", mapping)
- 
+  
   # issue warning sigma ----
   if(!is.null(sigma)) {
     
     SIGMA <- tryCatch({as.matrix(sigma)},
-                        error = function(e) return(NA))
+                      error = function(e) return(NA))
     
     if(is.na(SIGMA)) {
       stop(paste0("Tried to coerce", sQuote("sigma"),
@@ -275,14 +275,14 @@ Xy <-       function(n = 1000,
     
     # covariance
     for (i in 1:20) {
-    SIGMA <- matrix(runif(vars^2, min(cor), max(cor)),
-                    nrow = vars,
-                    ncol = vars)
-    # variance
-    diag(SIGMA) <- 1
-    chol_SIGMA <- tryCatch({chol(SIGMA)}, error = function(e) return(FALSE))
-    
-    if (is.matrix(chol_SIGMA)) break
+      SIGMA <- matrix(runif(vars^2, min(cor), max(cor)),
+                      nrow = vars,
+                      ncol = vars)
+      # variance
+      diag(SIGMA) <- 1
+      chol_SIGMA <- tryCatch({chol(SIGMA)}, error = function(e) return(FALSE))
+      
+      if (is.matrix(chol_SIGMA)) break
     }
     if (length(chol_SIGMA) == 1 && !chol_SIGMA) {
       stop(paste0("Could not calculate the cholesky decomposition",
@@ -292,13 +292,19 @@ Xy <-       function(n = 1000,
   }
   
   # sample and rotate X
-  X <- matrix(rnorm(n = n * vars, 
-                    mean = 0,
-                    sd = runif(1, min(sig), max(sig))),
-              ncol = vars, 
-              nrow = n) %*% chol_SIGMA
-
-
+  X <- lapply(rep(n, vars), 
+              FUN = function(x, sig) rnorm(x, mean = 0, sd = runif(1, min(sig), max(sig))),
+              sig = sig)
+  
+  # gather columns
+  X <- do.call("cbind", X)
+  
+  # rotation
+  X <- X %*% chol_SIGMA
+  
+  # scale
+  X <- apply(X, MARGIN = 2, FUN = scale, scale = FALSE)
+  
   # set X_TRANS as data.table
   X <- data.table(X)
   X_TRANS <- copy(X)
@@ -332,9 +338,9 @@ Xy <-       function(n = 1000,
   
   # create target ----
   target <- as.matrix(X_TRANS[, c(!grepl("NOISE", names(X_TRANS))), with = FALSE]) %*%
-                      INT %*%
-                      rep(1, NCOL(INT))
-
+    INT %*%
+    rep(1, NCOL(INT))
+  
   # create dummmy X_TRANS
   if (catvars[1] > 0) {
     
@@ -367,14 +373,14 @@ Xy <-       function(n = 1000,
     DW <- diag(round(mean(target)*runif(ncol(X_DUM), 0.01, 1), 2))
   }
   
-    
+  
   # add dummy effects
   if (catvars[1] > 0) {
     ref_class <- !grepl("*__1", names(X_DUM))
     
     target <- target + as.matrix(X_DUM[, ref_class]) %*% 
-                                          DW[ref_class, ref_class] %*% 
-                                                    rep(1, sum(ref_class))  
+      DW[ref_class, ref_class] %*% 
+      rep(1, sum(ref_class))  
     
     # set reference classes to zero
     DW[!ref_class, !ref_class] <- 0
@@ -409,11 +415,11 @@ Xy <-       function(n = 1000,
   
   # add intercept
   if (intercept) {
-  i_cept <-  mean(target)*runif(1, 0.01, 1)
-  i_cept_paste <- paste0("y = ", round(i_cept, 3), " + ")
-  target <- target + i_cept
+    i_cept <-  mean(target)/runif(1, 1, 100)
+    i_cept_paste <- paste0("y = ", round(i_cept, 3), " + ")
+    target <- target + i_cept
   } else {
-  i_cept_paste <- "y = "
+    i_cept_paste <- "y = "
   }
   
   # add noise
@@ -428,7 +434,7 @@ Xy <-       function(n = 1000,
   # transform target according to task
   tryCatch({X[, y := task$link(y)]}, error = function(e) stop("Could not apply link function."))
   tryCatch({X[, y := task$cutoff(y)]}, error = function(e) stop("Could not apply cutoff function."))
-
+  
   # describe y
   tgp <- paste0(i_cept_paste, paste0(c(int_raw, dw_raw), collapse = " + "))
   
@@ -451,11 +457,11 @@ Xy <-       function(n = 1000,
   psi[[2]] <- INT
   # catigorical variables
   if (catvars[1] > 0) {
-  psi[[3]] <- DW
+    psi[[3]] <- DW
   }
   # noise variables
   if (noisevars > 0) {
-  psi[[4]] <- diag(noisevars)
+    psi[[4]] <- diag(noisevars)
   }
   # target
   psi[[5]] <- 1
@@ -464,7 +470,7 @@ Xy <-       function(n = 1000,
   if (intercept) {
     X <- cbind(data.table("(Intercept)" = 1), X)
   }
-
+  
   # create the block diagonal transformation matrix
   psi <- Matrix::.bdiag(psi[!sapply(psi, is.null)])
   
@@ -483,4 +489,3 @@ Xy <-       function(n = 1000,
   # return ----
   return(OUT)
 }
-  

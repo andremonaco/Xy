@@ -10,7 +10,7 @@
 \usage{
 Xy(n = 1000, numvars = c(2, 2), catvars = c(1, 2), noisevars = 5,
   task = Xy_task(), nlfun = function(x) x^2, interactions = 1,
-  sig = c(1, 10), cor = c(0, 0.1), weights = c(5, 10), sigma = NULL,
+  sig = c(1, 1), cor = c(0, 0.1), weights = c(5, 10), sigma = NULL,
   stn = 4, noise.coll = FALSE, intercept = TRUE)
 
 \method{print}{Xy_sim}(x, ...)
