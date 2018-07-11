@@ -12,18 +12,18 @@ library(future.apply)
 library(ggplot2)
 library(scales)
 
-# simulate data with interaction effects and polynomial degree of two
+# simulate data without interaction effects and polynomial degree of two
 sig_sim = Xy(n = 1000,
              numvars = c(2,0), # 8 linear ; 0 nonlinear
              catvars = 0, # no dummies
              noisevars = 0, # 10 random variables
              task = Xy_task(), # 'regression' task
              nlfun = function(x) x^2, # polynomial degree of two
-             interactions = 1, # interactions of up to degree two
+             interactions = 1, # 1D interactions
              sig = c(1,30), # feature sd range
              cor = c(0), # feature collinearity range
              weights = c(-10,10), # feature weights range
-             stn = 0.01)  # no collinearity between random variables and X
+             stn = 4)  # signal to noise
 
 # extract the training data
 training <- sig_sim$data

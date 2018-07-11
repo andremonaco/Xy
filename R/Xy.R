@@ -60,6 +60,7 @@
 #' \itemize{
 #' \item \code{data} - the simulated data.table
 #' \item \code{tgp} - the target generating process as a string
+#' \item \code{eq} - a formula object with all variables
 #' \item \code{psi} - psi is a transformation matrix which transforms the raw data
 #'                    (stored in $data) to the true effects. However, you have to
 #'                    apply the nonlinear functions upfront. If you want to transform
@@ -107,8 +108,8 @@ Xy <-       function(n = 1000,
       # sample interaction
       sample.value <- sample(c(0, round(runif(
         interaction - 1,
-        min(weights),
-        max(weights)
+        -1,
+         1
       ), 2)),
       replace = FALSE,
       size = interaction - 1)
@@ -211,6 +212,12 @@ Xy <-       function(n = 1000,
      any(cor < 0)) {
     stop(paste0(sQuote("cor"), "has to be a vector specifying a numeric range",
                 " (in [0,1]) or a single numeric."))
+  }
+  
+  # interactions
+  if (interactions >= sum(numvars)) {
+    interactions <- sum(numvars)
+    warning(paste0("Reduced the interaciton depth to ", interactions))
   }
   
   # noise.coll
@@ -321,10 +328,10 @@ Xy <-       function(n = 1000,
   # manage interactions ----
   # interaction matrix raw (no interactions)
   INT <- diag(round(runif(vars-n.coll, min(weights), max(weights)), 2))
-  
+
   # sample interactions
-  if (interactions[1] > 1) {
-    INT <- add_interactions(INT, weights, interactions[1])
+  if (interactions > 1) {
+    INT <- add_interactions(INT, weights, interactions)
   }
   
   # extract the target generating process
@@ -471,15 +478,26 @@ Xy <-       function(n = 1000,
     X <- cbind(data.table("(Intercept)" = 1), X)
   }
   
+
   # create the block diagonal transformation matrix
   psi <- Matrix::.bdiag(psi[!sapply(psi, is.null)])
   
   # setting names
   colnames(psi) <- names(X)
   
+  # create a formula object
+  features <- paste0(names(X)[apply(psi, MARGIN = 2, FUN = function(x) sum(x)!=0)])
+  features <- features[-which(features == "y")]
+  features <- gsub("\\(Intercept\\)", 1, features)
+  if (!"1" %in% features) {
+  features <- c("-1", features)
+  }
+  eq <- formula(paste0("y ~ ", paste0(features, collapse = " + ")))
+  
   # add class
   OUT <- list(data = na.omit(X), 
               psi = psi,
+              eq = eq,
               task = task,
               tgp = tgp,
               control = input)

@@ -133,12 +133,13 @@ transform.Xy_sim <- function(`_data`, ...) {
 #' @param object an object of class \code{Xy_sim}
 #' @param use.noise a boolean indicating whether the noise of the process should
 #'                  be added to the variable importance
+#' @param plot a boolean specifying whether to print the variable importance
 #' @export
 #' @examples
 #' # Visualize Feature Importance of a Simulation
 #' my_simulation <- Xy()
 #' varimp(my_simulation)
-varimp <- function(object, use.noise = FALSE) {
+varimp <- function(object, use.noise = FALSE, plot = TRUE) {
   # transform the data
   trans <- transform(object)
   # exclude
@@ -180,7 +181,9 @@ varimp <- function(object, use.noise = FALSE) {
     coord_flip() + 
     theme_minimal(base_size = 14) +
     ylab("Importance") + xlab("")
+  if (plot) {
   print(p)
+  }
   
   return(imp)
 }

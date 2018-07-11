@@ -75,6 +75,7 @@ a list with the following entries
 \itemize{
 \item \code{data} - the simulated data.table
 \item \code{tgp} - the target generating process as a string
+\item \code{eq} - a formula object with all variables
 \item \code{psi} - psi is a transformation matrix which transforms the raw data
                    (stored in $data) to the true effects. However, you have to
                    apply the nonlinear functions upfront. If you want to transform

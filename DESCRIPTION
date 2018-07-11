@@ -4,7 +4,7 @@ Version: 0.1
 Authors@R: person("Andre", "Bleier", email = "andre.bleier@statworx.com", role = c("aut", "cre"))
 Description: This package contains a convenient function to simulate supervised learning data. The function is specifically
              designed to let the user a maximum degrees of freedom, to ultimately fulfill the research purpose.
-Depends: R (>= 3.4.3)
+Depends: R (>= 3.1)
 Imports: data.table, ggplot2, Matrix
 License: MIT + file LICENSE
 Encoding: UTF-8
