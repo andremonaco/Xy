@@ -19,7 +19,7 @@ library(ggplot2)
 set.seed(123)
 
 # how many simulations should be started
-n <- 50
+n <- 20
 
 # number of models per algorithm
 n_models <- 100
@@ -69,7 +69,7 @@ for (i in seq_len(n)) {
                stn = stn_ratio)  # signal to noise
   
   # the underlying variable importance
-  sim_varimp <- Xy::varimp(fs_sim, plot = FALSE)
+  sim_varimp <- Xy::varimp(fs_sim, plot = TRUE)
   
   # for measure 1
   sim_varimp[, REAL_IMPORTANCE := 100*(IMPORTANCE_MEAN - min(IMPORTANCE_MEAN)) / (max(IMPORTANCE_MEAN)-min(IMPORTANCE_MEAN))]
@@ -155,7 +155,7 @@ for (i in seq_len(n)) {
 
 fs_simulation <- do.call("rbind", results)
 
-save(fs_simulation, file = "~/Desktop/fs_simulation.RData")
+#save(fs_simulation, file = "~/Desktop/fs_simulation.RData")
 
 # OUTCOME EVALUATION ------------------------------------------------------
 
@@ -164,7 +164,7 @@ rslt_plt <- fs_simulation %>%
                 dplyr::select(., -SIM) %>%
                 rename(., 
                        "ALGORITHM" = ALGORITHM, 
-                       "MSE (M1)" = M1, 
+                       "Mean Absolute Error (M1)" = M1, 
                        "% Features Selected (M2)" = M2 , 
                        "Weighted Ratio (M3)" = M3) %>%
                 reshape2::melt("ALGORITHM") %>%
