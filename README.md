@@ -5,11 +5,9 @@ Simulating Supervised Learning Data <img src="/img/Xy.png" alt="drawing" width="
 
 
 
-With `Xy()` you can convienently simulate regression data. The simulation can be
-very specific, since the user has many degrees of freedom. For instance,
-the functional shape and hence the polynomial degree of nonlinearity can be
-manipulated. Interaction can be formed and (co)variances altered. For a more specific
-motivation you can visit our [blog](https://www.statworx.com/de/blog/simulating-regression-data-with-xy/)
+With `Xy()` you can convienently simulate supervised learning data. The simulation can be
+very specific, since there are many degrees of freedom for the user. For instance,
+the functional shape of the nonlinearity is user-defined as well. Interactions can be formed and (co)variances altered. For a more specific motivation you can visit our [blog](https://www.statworx.com/de/blog/simulating-regression-data-with-xy/)
 
 ## Usage
 
