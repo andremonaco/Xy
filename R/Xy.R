@@ -422,7 +422,7 @@ Xy <-       function(n = 1000,
   
   # add intercept
   if (intercept) {
-    i_cept <-  mean(target)/runif(1, 1, 100)
+    i_cept <-  diff(abs(range(target)))*0.3
     i_cept_paste <- paste0("y = ", round(i_cept, 3), " + ")
     target <- target + i_cept
   } else {
@@ -478,7 +478,6 @@ Xy <-       function(n = 1000,
     X <- cbind(data.table("(Intercept)" = 1), X)
   }
   
-
   # create the block diagonal transformation matrix
   psi <- Matrix::.bdiag(psi[!sapply(psi, is.null)])
   
