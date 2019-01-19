@@ -435,12 +435,12 @@ Xy <-       function(n = 1000,
   target <- target + noise
   
   # add to X_TRANS
-  X_TRANS[, y := target]
-  X[, y := target]
+  X_TRANS[, c("y") := target]
+  X[, c("y") := target]
   
   # transform target according to task
-  tryCatch({X[, y := task$link(y)]}, error = function(e) stop("Could not apply link function."))
-  tryCatch({X[, y := task$cutoff(y)]}, error = function(e) stop("Could not apply cutoff function."))
+  tryCatch({X[, c("y") := task$link(get("y"))]}, error = function(e) stop("Could not apply link function."))
+  tryCatch({X[, c("y") := task$cutoff(get("y"))]}, error = function(e) stop("Could not apply cutoff function."))
   
   # describe y
   tgp <- paste0(i_cept_paste, paste0(c(int_raw, dw_raw), collapse = " + "))

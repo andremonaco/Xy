@@ -89,7 +89,7 @@ plot.Xy_sim <- function(x, ...) {
   X <- x$data
 
   plt_df <- melt(X[, .SD, .SDcols = grep("y|NLIN|LIN", names(X), value = TRUE)], "y")
-  plt_df <- plt_df[order(value),  .SD, by = "variable"]
+  plt_df <- plt_df[order(get("value")),  .SD, by = "variable"]
   effects_plt <- ggplot(plt_df, aes_string(x = 'value', y = 'y')) + 
     geom_point(colour = "#13235B") + 
     facet_wrap(formula(paste0("~ variable")), scales = "free") + 
@@ -140,13 +140,14 @@ transform.Xy_sim <- function(`_data`, ...) {
 #' my_simulation <- Xy()
 #' varimp(my_simulation)
 varimp <- function(object, use.noise = FALSE, plot = TRUE) {
+  
   # transform the data
   trans <- transform(object)
   # exclude
   pattern <- "[^(NOISE_[:digit:])|y]"
   vars <- grep(pattern, names(trans), value = TRUE)
   # calculate e
-  trans[, noise := y-rowSums(.SD), .SDcols = vars]
+  trans[, c("noise") := get("y")-rowSums(.SD), .SDcols = vars]
   
   # should the noise be added to the variable importance
   if (use.noise) {
@@ -172,7 +173,7 @@ varimp <- function(object, use.noise = FALSE, plot = TRUE) {
   
   # create plot
   imp_df <- suppressWarnings(melt(imp_raw))
-  p <- ggplot(imp_df, aes(y = value, x = reorder(variable, value, median))) +
+  p <- ggplot(imp_df, aes_string(y = "value", x = reorder("variable", "value", median))) +
     stat_boxplot(geom='errorbar', linetype="longdash", width= 0.3) +
     geom_boxplot(outlier.color = "#F25D57", 
                  colour = "#13235B",

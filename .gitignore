@@ -3,7 +3,8 @@
 *.RData
 .Ruserdata
 *.Rproj
-.DS
+[.]DS_Store
 *.jpeg
 .html
+*.pdf
 README.html

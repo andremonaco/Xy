@@ -1,5 +1,5 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
-^\example
+examples
 ^\.circleci
 ^\img
