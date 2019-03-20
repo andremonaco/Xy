@@ -445,7 +445,7 @@ Xy <-       function(n = 1000,
     I <- matrix(rep(1, n), nrow=n)
     colnames(I) <- "(Intercept)"
   } else {
-    i_cept <- 0
+    i_cept <- NULL
     i_cept_paste <- "y = "
     I <- matrix(nrow=n)[,0]
   }
@@ -493,7 +493,7 @@ Xy <-       function(n = 1000,
   }
   
   # create the block diagonal transformation matrix
-  psi <- Matrix::.bdiag(psi)
+  psi <- Matrix::.bdiag(psi[!sapply(psi, function(x) all(is.null(x)))])
   
   # setting names
   psi@Dimnames[[2]] <- colnames(data)
