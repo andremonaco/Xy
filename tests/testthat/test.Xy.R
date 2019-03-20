@@ -4,7 +4,7 @@ context("Xy Testing")
 # REGRESSION / CLASSIFICATION ---------------------------------------------
 
 test_that("Standard Case", {
-  
+  require(data.table)
   unit <- Xy()
   
   expect_that(unit, is_a("Xy_sim"))
@@ -34,7 +34,7 @@ test_that("Classification", {
 
 test_that("Collinearity Case", {
   
-  unit <- Xy(noise.coll = TRUE)
+  unit <- Xy(noise_coll = TRUE)
   
   expect_that(unit, is_a("Xy_sim"))
   expect_that(unit$data, is_a("data.table"))

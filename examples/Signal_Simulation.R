@@ -14,9 +14,9 @@ library(scales)
 
 # simulate data without interaction effects and polynomial degree of two
 sig_sim = Xy(n = 1000,
-             numvars = c(2,0), # 8 linear ; 0 nonlinear
+             numvars = c(2,0), # 2 linear ; 0 nonlinear
              catvars = 0, # no dummies
-             noisevars = 0, # 10 random variables
+             noisevars = 0, # 0 random variables
              task = Xy_task(), # 'regression' task
              nlfun = function(x) x^2, # polynomial degree of two
              interactions = 1, # 1D interactions
@@ -53,7 +53,7 @@ simulate_single <- function(stn, runs = 100) {
                         weights = c(-10,10), # feature weights range
                         stn = stn, # signal to noise ratio
                         intercept = TRUE,
-                        noise.coll = FALSE)  # no collinearity between random variables and X
+                        noise_coll = FALSE)  # no collinearity between random variables and X
     
     
     # extract the training data

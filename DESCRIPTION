@@ -1,13 +1,14 @@
 Package: Xy
 Title: Simulating Supervised Learning Data
-Version: 0.1
+Version: 0.2
 Authors@R: person("Andre", "Bleier", email = "andrebleier@live.de", role = c("aut", "cre"))
-Description: This package contains a convenient function to simulate supervised learning data. The function is specifically
+Description: A simulation framework for supervised learning data. The functionalities are specifically
              designed to let the user a maximum degrees of freedom, to ultimately fulfill the research purpose.
              Furthermore, feature importances of the simulation can be created on a local and a global level. 
              This is particular interesting, for instance, to benchmark feature selection algorithms.
-Depends: R (>= 3.1), stats, data.table, Matrix, ggplot2
-License: MIT + file LICENSE
+Depends: R (>= 3.1), stats, Matrix, ggplot2, mvtnorm
+Imports: data.table
+License: GPL-3
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 6.1.1

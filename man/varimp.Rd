@@ -4,12 +4,12 @@
 \alias{varimp}
 \title{Variable Importance}
 \usage{
-varimp(object, use.noise = FALSE, plot = TRUE)
+varimp(object, use_noise = FALSE, plot = TRUE)
 }
 \arguments{
 \item{object}{an object of class \code{Xy_sim}}
 
-\item{use.noise}{a boolean indicating whether the noise of the process should
+\item{use_noise}{a boolean indicating whether the noise of the process should
 be added to the variable importance}
 
 \item{plot}{a boolean specifying whether to print the variable importance}

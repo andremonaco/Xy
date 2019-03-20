@@ -85,6 +85,7 @@ coef.Xy_sim <- function(object, ...) {
 #' # Plotting the true underlying effects
 #' plot(my_simulation)
 plot.Xy_sim <- function(x, ...) {
+  
   # get data
   X <- x$data
 
@@ -131,7 +132,7 @@ transform.Xy_sim <- function(`_data`, ...) {
 
 #' Variable Importance
 #' @param object an object of class \code{Xy_sim}
-#' @param use.noise a boolean indicating whether the noise of the process should
+#' @param use_noise a boolean indicating whether the noise of the process should
 #'                  be added to the variable importance
 #' @param plot a boolean specifying whether to print the variable importance
 #' @export
@@ -139,7 +140,7 @@ transform.Xy_sim <- function(`_data`, ...) {
 #' # Visualize Feature Importance of a Simulation
 #' my_simulation <- Xy()
 #' varimp(my_simulation)
-varimp <- function(object, use.noise = FALSE, plot = TRUE) {
+varimp <- function(object, use_noise = FALSE, plot = TRUE) {
   
   # transform the data
   trans <- transform(object)
@@ -150,7 +151,7 @@ varimp <- function(object, use.noise = FALSE, plot = TRUE) {
   trans[, c("noise") := get("y")-rowSums(.SD), .SDcols = vars]
   
   # should the noise be added to the variable importance
-  if (use.noise) {
+  if (use_noise) {
     vars <- grep(pattern, names(trans), value = TRUE)
   }
   
@@ -173,7 +174,7 @@ varimp <- function(object, use.noise = FALSE, plot = TRUE) {
   
   # create plot
   imp_df <- suppressWarnings(melt(imp_raw))
-  p <- ggplot(imp_df, aes_string(y = "value", x = reorder("variable", "value", median))) +
+  p <- ggplot(imp_df, aes(y = value, x = reorder(variable, value, median))) +
     stat_boxplot(geom='errorbar', linetype="longdash", width= 0.3) +
     geom_boxplot(outlier.color = "#F25D57", 
                  colour = "#13235B",

@@ -1,6 +1,5 @@
 context("Method Testing")
 
-
 test_that("Print", {
   expect_output(print(Xy()))
 })
@@ -19,4 +18,16 @@ test_that("Transform", {
   sim <- Xy()
   trans <- transform(sim)
   expect_that(trans, is_a("data.table"))
+})
+
+test_that("Varimp", {
+  sim <- Xy()
+  varimp <- varimp(sim, plot = FALSE)
+  expect_that(varimp, is_a("data.table"))
+})
+
+test_that("Varimp Plot", {
+  sim <- Xy()
+  varimp <- varimp(sim, plot = TRUE)
+  expect_that(varimp, is_a("data.table"))
 })

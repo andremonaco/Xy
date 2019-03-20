@@ -10,8 +10,8 @@
 \usage{
 Xy(n = 1000, numvars = c(2, 2), catvars = c(1, 2), noisevars = 5,
   task = Xy_task(), nlfun = function(x) x^2, interactions = 1,
-  sig = c(1, 1), cor = c(0, 0.1), weights = c(5, 10), sigma = NULL,
-  stn = 4, noise.coll = FALSE, intercept = TRUE)
+  sig = c(1, 1), cor = c(-0.5, 0.5), weights = c(5, 10),
+  cormat = NULL, stn = 4, noise_coll = FALSE, intercept = TRUE)
 
 \method{print}{Xy_sim}(x, ...)
 
@@ -51,14 +51,14 @@ applicable.}
 \item{weights}{a vector c(min, max) specifying 
 the multiplication magnitude to sample from}
 
-\item{sigma}{a covariance matrix for the linear and nonlinear simulation.
+\item{cormat}{a correlation matrix for the linear and nonlinear simulation.
 Defaults to \code{NULL} which means the structure
 will be sampled from \code{cor}}
 
 \item{stn}{an integer value determining the signal to noise ratio.
 Higher values lead to more signal and less noise.}
 
-\item{noise.coll}{a boolean determining noise collinearity with X}
+\item{noise_coll}{a boolean determining noise collinearity with X}
 
 \item{intercept}{a boolean indicating whether an intercept should enter the model}
 

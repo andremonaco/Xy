@@ -3,3 +3,6 @@
 examples
 ^\.circleci
 ^\img
+[.]md
+[.]png
+[.]travis[.]yml
