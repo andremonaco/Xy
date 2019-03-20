@@ -1,4 +1,5 @@
 [![CircleCI](https://circleci.com/gh/andrebleier/Xy.svg?style=svg)](https://circleci.com/gh/andrebleier/Xy)
+[![Build Status](https://img.shields.io/travis/codecov/example-r/master.svg)](https://travis-ci.org/andrebleier/Xy)   [![codecov](https://codecov.io/github/codecov/example-r/branch/master/graphs/badge.svg)](https://codecov.io/github/andrebleier/Xy) 
 
 Simulating Supervised Learning Data <img src="/img/Xy.png" alt="drawing" width="150px" align="right"/> 
 ===================================
