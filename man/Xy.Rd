@@ -8,10 +8,22 @@
 \alias{transform.Xy_sim}
 \title{Xy}
 \usage{
-Xy(n = 1000, numvars = c(2, 2), catvars = c(1, 2), noisevars = 5,
-  task = Xy_task(), nlfun = function(x) x^2, interactions = 1,
-  sig = c(1, 1), cor = c(-0.5, 0.5), weights = c(5, 10),
-  cormat = NULL, stn = 4, noise_coll = FALSE, intercept = TRUE)
+Xy(
+  n = 1000,
+  numvars = c(2, 2),
+  catvars = c(1, 2),
+  noisevars = 5,
+  task = Xy_task(),
+  nlfun = function(x) x^2,
+  interactions = 1,
+  sig = c(1, 1),
+  cor = c(-0.5, 0.5),
+  weights = c(5, 10),
+  cormat = NULL,
+  stn = 4,
+  noise_coll = FALSE,
+  intercept = TRUE
+)
 
 \method{print}{Xy_sim}(x, ...)
 

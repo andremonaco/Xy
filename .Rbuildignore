@@ -1,8 +1,8 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
 examples
-^\.circleci
-^\img
+.circleci
+img
 [.]md
 [.]png
 [.]travis[.]yml
