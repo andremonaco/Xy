@@ -88,16 +88,26 @@ plot.Xy_sim <- function(x, ...) {
   
   # get data
   X <- x$data
-
   plt_df <- melt(X[, .SD, .SDcols = grep("y|NLIN|LIN", names(X), value = TRUE)], "y")
   plt_df <- plt_df[order(get("value")),  .SD, by = "variable"]
-  effects_plt <- ggplot(plt_df, aes_string(x = 'value', y = 'y')) + 
-    geom_point(colour = "#13235B") + 
+  effects_plt <- ggplot(plt_df, aes_string(x = 'value', y = 'y'))
+  
+  if (nrow(X) > 1000) {
+    effects_plt <- effects_plt + geom_hex(colour = "#13235B")
+  } else {
+    effects_plt <- effects_plt + geom_point(colour = "#13235B")
+  }
+  
+  effects_plt <- effects_plt +
     facet_wrap(formula(paste0("~ variable")), scales = "free") + 
     theme_minimal(base_size = 14) +
     xlab("") +
-    ggtitle("True effects X vs y") +
-    geom_smooth(method = "loess", colour = "#00C792")
+    ggtitle("True effects X vs y")
+  
+  if (nrow(X) <= 1000) {
+    effects_plt <- effects_plt +
+      geom_smooth(method = "loess", colour = "#00C792")
+  }
   
   print(effects_plt)
   return(effects_plt)
