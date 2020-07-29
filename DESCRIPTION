@@ -6,10 +6,21 @@ Description: A simulation framework for supervised learning data. The functional
              designed to let the user a maximum degrees of freedom, to ultimately fulfill the research purpose.
              Furthermore, feature importances of the simulation can be created on a local and a global level. 
              This is particular interesting, for instance, to benchmark feature selection algorithms.
-Depends: R (>= 3.1), stats, Matrix, ggplot2, mvtnorm
-Imports: data.table
-License: GPL-3
+Depends: R (>= 4.0)
+Imports: 
+    stringr,
+    rlang,
+    Matrix,
+    purrr,
+    copula,
+    ggplot2,
+    tidyr,
+    tibble,
+    dplyr,
+    magrittr
+License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
+Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.1
 Suggests: testthat

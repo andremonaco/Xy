@@ -6,3 +6,4 @@ img
 [.]md
 [.]png
 [.]travis[.]yml
+^LICENSE\.md$
