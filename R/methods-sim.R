@@ -140,7 +140,7 @@ plot.xy_sim <- function(x, ...) {
   # get data
   plt_df <- x %>%
     pull_xy() %>%
-    select(-matches("intercept")) %>%
+    select(-matches("intercept|xd|random")) %>%
     tidyr::gather(key = "effect", value = "value", -y)
   
   effects_plt <- ggplot(plt_df, aes_string(x = 'value', y = 'y'))

@@ -71,7 +71,7 @@ simulate <-       function(object,
   }
   
   # check if noise is added and add noise if none was specified
-  if (nrow(object$book %>% filter(type == "noise")) == 0) {
+  if (nrow(object$book %>% dplyr::filter(type == "noise")) == 0) {
     object <- object %>%
       add_noise()
   }
@@ -80,11 +80,12 @@ simulate <-       function(object,
   object$book <- object$book %>% 
     group_by(name) %>%
     mutate(name = paste(name, 1:n(), sep = "_"),
-           name = replace(name, type=='noise', "e"))
+           name = replace(name, type=='noise', "e")) %>%
+    arrange(type)
   
-  # extract the simulation book
+  # extract book
   book <- object$book
-
+  
   # functions -----
   # adds interaction terms to the process
   sample_interactions <- function(x) {
@@ -283,6 +284,66 @@ simulate <-       function(object,
     # set the names of the simulation matrix
     purrr::set_names(book %>% pull(name))
   
+  # fetch discrete variables
+  discr_idx <- which(book$type == "discrete")
+  
+  # expand discrete variables (dummy matrix)
+  expand_discrete <- function(mat, intercept, indices, book) {
+    
+    coerce_factor <- function(x) {
+      factor(x, labels = paste0("__", as.character(1:length(unique(x)))))
+    }
+    
+    discr_mat <- mat %>%
+      select(indices) %>%
+      mutate_all(., .funs = list(coerce_factor))
+    
+    dum_eqn <- paste("~", ifelse(intercept, 1, -1), "+ .")
+    dummies <- model.matrix(as.formula(dum_eqn), data = discr_mat) %>%
+      as_tibble() %>%
+      select(-matches("Intercept"))
+    
+    out <- list()
+    out$mat <- mat %>%
+                select(-indices) %>%
+                bind_cols(dummies, .)
+    
+    discr_book <- book %>% 
+      filter(type == "discrete") %>%
+      ungroup()
+      
+    reps <- names(dummies) %>%
+      gsub("(.*)__.*", "\\1", .) %>%
+      table()
+    
+    new_discr_book <- lapply(1:nrow(discr_book),
+             FUN = function(x, y, discr_book) {
+               discr_book %>%
+                 slice(rep(x, y[x]))
+             }, discr_book = discr_book,
+                y = reps) %>%
+        bind_rows() %>%
+        mutate(name = names(dummies))
+
+      
+      
+    # change book
+    out$new_book <- book %>%
+      filter(type != "discrete") %>%
+      bind_rows(new_discr_book, .)
+    return(out)
+  }
+  
+  if (length(discr_idx)>0) {
+    exp_discr <- expand_discrete(mat = sim_mat,
+                                 intercept = object$intercept,
+                                 indices = discr_idx,
+                                 book = book)
+    
+    book <- exp_discr$new_book
+    sim_mat <- exp_discr$mat
+  }
+  
   # save pre transformed numerical matrix
   trans_mat <- sim_mat
   
@@ -295,6 +356,7 @@ simulate <-       function(object,
     purrr::map2(.x = ., .y = nlfuns, .f = ~.y(.x)) %>%
     as_tibble()
   
+
   # TODO: expand discrete features
   
   # manage interactions ----

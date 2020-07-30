@@ -135,10 +135,10 @@ add_nonlinear <- function(object, p, nlfun, family = xy_normal()) {
 #' @rdname add_effects
 add_discrete <- function(object, p, levels = 2) {
   
-  family <- xy_binom(size = levels, prob = 1/levels)
+  family <- xy_binom(size = levels-1, prob = 1/(levels))
   
   object$book <- tibble(type = "discrete", 
-                name = "discrete",
+                name = "xd",
                 nlfun = list(function(x) x),
                 collinearity = NULL,
                 params = family %>% pull(params),
