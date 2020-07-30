@@ -42,9 +42,9 @@ task <- Xy(task = "regression")
 # build the recipe
 recipe <- task %>%
   # adding linear features
-  add_linear(5) %>%
+  add_linear(p = 5, family = xy_normal()) %>%
   # adding non-linear cubic features
-  add_nonlinear(3, nlfun= function(x) x^3) %>%
+  add_nonlinear(p = 3, nlfun= function(x) x^3, family = xy_normal()) %>%
   # add uninformative effects
   add_uninformative(p = 3, collinearity = TRUE, family = xy_normal()) %>%
   # add dummy variables
