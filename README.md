@@ -70,7 +70,7 @@ You can extract a feature importance of your simulation. For instance, to benchm
 # Feature Importance 
 variable_importance <- sim %>% importance()
 ```
-<img src="/img/imp.svg" alt="drawing"/> 
+<img src="/img/imp.png" alt="drawing"/> 
 
 Feel free to [contact](mailto:andre.bleier@statworx.com) me with input and ideas.
 
