@@ -1,8 +1,18 @@
 language: r
 
+os:
+  - linux
+  - osx
+  
 sudo: required
 
 env: _R_CHECK_CRAN_INCOMING_=FALSE
+
+apt_packages:
+  - libgsl-dev
+      
+brew_packages:
+  - gsl
 
 r_packages:
   - covr
