@@ -1,6 +1,6 @@
 [![Build Status](https://img.shields.io/travis/andrebleier/Xy/master.svg)](https://travis-ci.org/andrebleier/Xy)   [![codecov](https://codecov.io/github/andrebleier/Xy/branch/master/graphs/badge.svg)](https://codecov.io/github/andrebleier/Xy) 
 
-Simulating Supervised Learning Data <img src="/img/Xy.png" alt="drawing" width="150px" align="right"/> 
+Simulating Supervised Learning Data <img src="https://github.com/andrebleier/Xy/raw/master/man/figures/Xy.png" alt="drawing" width="150px" align="right"/> 
 ===================================
 
 
@@ -20,6 +20,24 @@ There are numerous applications for the package, e.g.:
 The usage is pretty straight forward. I strongly encourage you to read the help document to explore all functionalities.
 
 ### Install
+
+The `Xy()` package uses the [GNU scientific library](https://www.gnu.org/software/gsl/). Linux and MacOs users are adviced to install this package before installing the code from github.
+
+Mac:
+
+Install through [Homebrew](https://brew.sh/) via
+
+```
+brew install gsl
+```
+
+Linux:
+
+```
+sudo apt-get install libgsl-dev
+```
+
+All Operating systems:
 
 Install the package with <code>remotes</code>:
 
@@ -70,7 +88,7 @@ You can extract a feature importance of your simulation. For instance, to benchm
 # Feature Importance 
 variable_importance <- sim %>% importance()
 ```
-<img src="/img/imp.png" alt="drawing"/> 
+<img src="https://github.com/andrebleier/Xy/raw/master/man/figures/imp.png" alt="drawing"/> 
 
 Feel free to [contact](mailto:andre.bleier@statworx.com) me with input and ideas.
 
