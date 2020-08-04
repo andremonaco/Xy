@@ -8,3 +8,5 @@
 .html
 *.pdf
 README.html
+docs
+^_pkgdown\.yml$

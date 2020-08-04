@@ -7,3 +7,6 @@ img
 [.]png
 [.]travis[.]yml
 ^LICENSE\.md$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$
