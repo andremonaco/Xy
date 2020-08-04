@@ -6,7 +6,7 @@ Description: A simulation framework for supervised learning data. The functional
              designed to let the user a maximum degrees of freedom, to ultimately fulfill the research purpose.
              Furthermore, feature importances of the simulation can be created on a local and a global level. 
              This is particular interesting, for instance, to benchmark feature selection algorithms.
-Depends: R (>= 4.0)
+Depends: R (>= 3.6)
 Imports: 
     stringr,
     rlang,

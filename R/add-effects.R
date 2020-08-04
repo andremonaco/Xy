@@ -12,6 +12,17 @@
 #'                     the features and uninformative variables
 #' @param levels an integer specifying the number of levels within the simulated
 #'               discrete variable
+#' @details A note on non-linear effects: Depending on the non-linear function
+#'          it is highly recommended to adjust the parameters of the family, e.g.
+#'          for a nonlinear quadratic function it is recommended to sample from
+#'          a uniform distribution with minimum value of 0 and maximum value of
+#'          1000 such that the non-linearity is clearly visible in the data.
+#'          ```
+#'          # nonlinear simulation
+#'          sim_nl <- Xy(task = "regression") %>%
+#'                    add_nonlinear(p = 5, nlfun = function(x) x^2,
+#'                                  family = xy_uniform(min = 0, max = 1000))
+#'          ```
 #' @import dplyr
 #' @importFrom tibble tibble
 #' @importFrom purrr when
@@ -25,7 +36,7 @@
 #' 
 #' # add cubic nonlinear features
 #' xy_recipe <- xy_recipe %>%
-#' add_nonlinear(p = 3, nlfun = function(x) x^3)
+#' add_nonlinear(p = 3, nlfun = function(x) x^3, family = xy_uniform(min = 0, max = 1000))
 #' 
 #' # add discrete features with four unique factor levels
 #' xy_recipe <- xy_recipe %>%
@@ -83,7 +94,7 @@ add_nonlinear <- function(object, p, nlfun, family = xy_normal()) {
   # set the name of the nonlinear function
   # CASE 1:
   # try to set the name by the body of the function (works for short functions)
-  if (nchar(nlfun_name) < 10) {
+  if (nchar(nlfun_name) < 20) {
     
     name <- nlfun_name
   

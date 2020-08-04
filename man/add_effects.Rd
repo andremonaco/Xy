@@ -47,6 +47,14 @@ an object of class \code{\link[=Xy]{xy_recipe}}
 With the helping function below you can alter a simulation by simply
 adding the desired effects to the simulation object from \code{\link[=Xy]{Xy()}}.
 }
+\details{
+A note on non-linear effects: Depending on the non-linear function
+it is highly recommended to adjust the parameters of the family, e.g.
+for a nonlinear quadratic function it is recommended to sample from
+a uniform distribution with minimum value of 0 and maximum value of
+1000 such that the non-linearity is clearly visible in the data.
+\verb{# nonlinear simulation sim_nl <- Xy(task = "regression") \%>\% add_nonlinear(p = 5, nlfun = function(x) x^2, family = xy_uniform(min = 0, max = 1000))}
+}
 \examples{
 xy_recipe <- Xy(task = "regression") \%>\%
 # add linear features
@@ -54,7 +62,7 @@ add_linear(p = 5)
 
 # add cubic nonlinear features
 xy_recipe <- xy_recipe \%>\%
-add_nonlinear(p = 3, nlfun = function(x) x^3)
+add_nonlinear(p = 3, nlfun = function(x) x^3, family = xy_uniform(min = 0, max = 1000))
 
 # add discrete features with four unique factor levels
 xy_recipe <- xy_recipe \%>\%

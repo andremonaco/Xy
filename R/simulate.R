@@ -219,10 +219,7 @@ simulate <-       function(object,
     
     # draw a random sample from the copula
     out <- suppressWarnings(copula::rMvdc(n_obs, mod_copula))
-    
-    # normalize the variables to avoid ambigous values
-    out <- apply(out, MARGIN = 2, function(x) (x/max(x)))
-    
+
     return(out)
   }
   
@@ -356,13 +353,17 @@ simulate <-       function(object,
     purrr::map2(.x = ., .y = nlfuns, .f = ~.y(.x)) %>%
     as_tibble()
   
-
   # TODO: expand discrete features
   
   # manage interactions ----
   # interaction matrix raw (no interactions)
   # sample weights (from [-5;5])
   weights <- round(runif(ncol(trans_mat), -5, 5), 2)
+  
+  # adjust nlin weights
+  nl_idx <- which(book$type == "nonlinear")
+  weights[nl_idx] <- weights[nl_idx]*1e-2
+  
   # set weights of uninformative or noise to 0
   no_weight_idx <- book %>% 
     pull(type) %>%
@@ -404,7 +405,7 @@ simulate <-       function(object,
   if (object$intercept) {
     # simulate intercept
     # use a percentage of the maximum value of the target
-    intercept <- max(abs(target))*sample(seq(-4e-1, 4e-1, 11e-2), size = 1)
+    intercept <- max(abs(target))*sample(seq(-2e-1, 2e-1, 11e-2), size = 1)
     # prepare the stringt for the target generating process (intercept)
     tgp_intercept <- paste0("y = ", round(intercept, 3))
     # add the intercept to the process
@@ -492,10 +493,11 @@ simulate <-       function(object,
   # apply link and cutoff
   data <- bind_cols(sim_intercept, sim_mat, y = target) %>%
           # apply link function
-          mutate(y = purrr::map_dbl(y, ~ possible_link(.x))) %>%
+          mutate(y = purrr::map_dbl(y, ~ possible_link(.x)),
+                 y = purrr::map_dbl(y, ~possible_cutoff(.x))) %>%
           purrr::when(object$task$type == "regression"
-                      ~ mutate(., y = purrr::map_dbl(y, ~possible_cutoff(.x))),
-                      ~ mutate(., y = purrr::map_int(y, ~possible_cutoff(.x)))
+                      ~ mutate(., y = y),
+                      ~ mutate(., y = as.integer(y))
           )
   
   # build tgp part for the error
