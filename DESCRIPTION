@@ -18,6 +18,7 @@ Imports:
     tibble,
     dplyr,
     magrittr
+NeedsCompilation: yes
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
