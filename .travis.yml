@@ -6,8 +6,6 @@ os:
   
 sudo: required
 
-env: _R_CHECK_CRAN_INCOMING_=FALSE
-
 apt_packages:
   - libgsl-dev
       
