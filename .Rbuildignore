@@ -10,3 +10,4 @@ img
 ^_pkgdown\.yml$
 ^docs$
 ^pkgdown$
+^\.travis\.yml$
