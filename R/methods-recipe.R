@@ -2,6 +2,7 @@
 #' @param x an object of class [`xy_recipe`][Xy()]
 #' @param ... arguments to be passed to the method
 #' @import dplyr
+#' @imporFrom crayon bold red
 #' @examples
 #' # print a simulation recipe
 #' Xy() %>%
@@ -30,23 +31,23 @@ print.xy_recipe <- function(x, ...) {
   }
 
   # summary ----
-  cat(paste0("Xy Simulation Recipe\n"))
+  cat(bold(paste0("Xy Simulation Recipe\n")))
   cat(paste0(" \t | \n"))
-  cat(paste0(" \t | + task ", x$task$name, "\n"))
-  cat(paste0(" \t | + interactions ", interactions, "D", "\n"))
+  cat(paste0(" \t | + task ", red(x$task$name), "\n"))
+  cat(paste0(" \t | + interactions ", red(paste0(interactions, "D")), "\n"))
 
   # effects -----
   cat(paste0(" \t | + effects \n"))
   cat(paste0(" \t   | - linear ", n_vars %>%
     filter(type == "linear") %>%
-    pull(n), "\n"))
+    pull(n) %>% red(), "\n"))
   cat(paste0(" \t   | - nonlinear ", n_vars %>%
     filter(type == "nonlinear") %>%
-    pull(n), "\n"))
+    pull(n) %>% red(), "\n"))
   cat(paste0(" \t   | - discrete ", n_vars %>%
     filter(type == "discrete") %>%
-    pull(n), "\n"))
-  cat(paste0(" \t   | - noise ", print_e, "\n"))
+    pull(n) %>% red(), "\n"))
+  cat(paste0(" \t   | - noise ", red(print_e), "\n"))
 
   return(invisible())
 }

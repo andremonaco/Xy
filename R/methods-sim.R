@@ -20,6 +20,8 @@
 #' @param _data an object of class [`xy_sim`][Xy()]
 #' @param ... additional parameters
 #' @import ggplot2 dplyr tibble
+#' @importFrom crayon bold red underline
+#' @importFrom glue glue
 #' @importFrom tidyr gather
 #' @importFrom purrr map2
 #' @importFrom rlang abort
@@ -86,39 +88,111 @@ print.xy_sim <- function(x, ...) {
     )
   }
 
+  # prepare target generating process
+  # generate the equation for the target generating process
+  tgp_main_effects <- function(data) {
+    idx <- str_detect(colnames(data), "random|^y$|^e$")
+    col_names <- colnames(data)[!idx]
+    raw_weights <- diag(data)[!idx]
+    col_names[which(col_names == "intercept")] <- ""
+    weights <- ifelse(raw_weights < 0,
+      paste0("{red(-", prettyNum(signif(abs(raw_weights), 2)), ")}"),
+      paste0("+", prettyNum(signif(raw_weights, 2)))
+    )
+    out <- paste0(weights, paste0("{bold(\"", col_names, "\")}"), collapse = " ")
+    return(out)
+  }
+
+  tgp_interactions <- function(data) {
+    # overwrite main effects
+    diag(data) <- 0
+    # fetch names
+    col_names <- colnames(data)
+
+    # fetch interactions
+    tgp_single_interaction <- function(i, m, k) {
+
+      # find interactions
+      interactions <- which(m[, i] != 0)
+
+      # exit if there are no interactions
+      if (length(interactions) == 0) {
+        return(character())
+      }
+
+      # prettify the weights
+      pretty_weights <- ifelse(m[interactions, i] < 0,
+        paste0("red(- ", abs(m[interactions, i]), ")"),
+        paste0("+ ", m[interactions, i])
+      )
+
+      # paste together weights (feature_1 * feature_2)
+      out <- paste0(pretty_weights,
+        "(",
+        "bold(, ", k[i], ") * bold(",
+        k[interactions],
+        "))",
+        sep = ""
+      ) %>%
+        paste0(., collapse = " ")
+      return(out)
+    }
+
+    out <- sapply(seq_len(ncol(data)),
+      FUN = tgp_single_interaction,
+      m = data,
+      k = col_names
+    ) %>%
+      do.call("paste0", .)
+  }
+
+  # filter out random vars, noise and target
+
+  # the main effects
+  tgp_main <- tgp_main_effects(data = x$psi)
+
+  # the interaction effects
+  tgp_interact <- tgp_interactions(data = x$psi)
+
+  tgp_error <- paste0(" + {bold(print_e)}")
+
+  tgp_start <- "{bold(\"y\")} = "
+
+  tgp <- paste0(tgp_start, tgp_main, tgp_interact, tgp_error, collapse = " ")
+
   # summary ----
-  cat(paste0("Xy Simulation \n"))
+  cat(bold(paste0("Xy Simulation \n")))
   cat(paste0(" \t | \n"))
-  cat(paste0(" \t | + task ", x$task, "\n"))
-  cat(paste0(" \t | + interactions ", interactions, "D", "\n"))
+  cat(paste0(" \t | + task ", red(x$task), "\n"))
+  cat(paste0(" \t | + interactions ", red(paste0(interactions, "D")), "\n"))
 
   # effects -----
   cat(paste0(" \t | + effects \n"))
   cat(paste0(" \t   | - linear ", n_vars %>%
     filter(type == "linear") %>%
-    pull(n), "\n"))
+    pull(n) %>% red(), "\n"))
   cat(paste0(" \t   | - nonlinear ", n_vars %>%
     filter(type == "nonlinear") %>%
-    pull(n), "\n"))
+    pull(n) %>% red(), "\n"))
   cat(paste0(" \t   | - discrete ", n_vars %>%
     filter(type == "discrete") %>%
-    pull(n), "\n"))
+    pull(n) %>% red(), "\n"))
   if ("intercept" %in% (book %>% pull(name))) {
     cat(paste0(" \t   | - intercept\n"))
   }
 
-  cat(paste0(" \t   | - noise ", print_e, "\n"))
+  cat(paste0(" \t   | - noise ", red(print_e), "\n"))
 
   # simulation
   cat(paste0(" \t | + simulation \n"))
-  cat(paste0(" \t   | - n ", nrow(x$data), "\n"))
-  cat(paste0(" \t   | - r-squared ", x$r_sq, "\n"))
-  cat(paste0(" \t   | - correlation interval ", "[", min(x$cor), ", ", max(x$cor), "]", "\n"))
+  cat(paste0(" \t   | - n ", red(nrow(x$data)), "\n"))
+  cat(paste0(" \t   | - r-squared ", red(x$r_sq), "\n"))
+  cat(paste0(" \t   | - correlation interval ", red(paste0("[", min(x$cor), ", ", max(x$cor), "]")), "\n"))
 
   # data generating process ----
   cat("\n")
   cat("\n")
-  cat(paste0(x$tgp))
+  cat(glue(tgp))
   cat("\n")
 
   return(invisible())

@@ -1,26 +1,36 @@
 Package: Xy
 Title: Simulating Supervised Learning Data
 Version: 0.2
-Authors@R: person("Andre", "Bleier", email = "andrebleier@live.de", role = c("aut", "cre"))
-Description: A simulation framework for supervised learning data. The functionalities are specifically
-             designed to let the user a maximum degrees of freedom, to ultimately fulfill the research purpose.
-             Furthermore, feature importances of the simulation can be created on a local and a global level. 
-             This is particular interesting, for instance, to benchmark feature selection algorithms.
-Depends: R (>= 3.6)
-Imports: 
-    stringr,
-    rlang,
-    Matrix,
-    purrr,
-    copula,
-    ggplot2,
-    tidyr,
-    tibble,
-    dplyr,
-    magrittr
+Authors@R: 
+    person(given = "Andre",
+           family = "Bleier",
+           role = c("aut", "cre"),
+           email = "andrebleier@live.de")
+Description: A simulation framework for supervised learning
+    data. The functionalities are specifically designed to let the user a
+    maximum degrees of freedom, to ultimately fulfill the research
+    purpose.  Furthermore, feature importances of the simulation can be
+    created on a local and a global level.  This is particular
+    interesting, for instance, to benchmark feature selection algorithms.
 License: MIT + file LICENSE
+Depends: 
+    R (>= 3.6)
+Imports: 
+    Matrix,
+    copula,
+    crayon,
+    dplyr,
+    ggplot2,
+    glue,
+    magrittr,
+    purrr,
+    rlang,
+    stringr,
+    tibble,
+    tidyr
+Suggests: 
+    testthat
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.1
-Suggests: testthat

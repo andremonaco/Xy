@@ -244,58 +244,6 @@ simulate <- function(object,
     return(out)
   }
 
-  tgp_main_effects <- function(mat, cnames) {
-    ind <- which(diag(mat) != 0)
-    int_mat_subset <- diag(mat)[ind]
-    weights <- ifelse(int_mat_subset < 0,
-      paste0("- ", abs(int_mat_subset)),
-      paste0("+ ", int_mat_subset)
-    )
-    out <- paste0(weights, cnames[ind], collapse = " ")
-    return(out)
-  }
-
-  tgp_interactions <- function(mat, cnames) {
-    # overwrite main effects
-    diag(mat) <- 0
-
-    # fetch interactions
-    tgp_single_interaction <- function(i, m, k) {
-
-      # find interactions
-      interactions <- which(m[, i] != 0)
-
-      # exit if there are no interactions
-      if (length(interactions) == 0) {
-        return(character())
-      }
-
-      # prettify the weights
-      pretty_weights <- ifelse(m[interactions, i] < 0,
-        paste0(" - ", abs(m[interactions, i])),
-        paste0(" + ", m[interactions, i])
-      )
-
-      # paste together weights (feature_1 * feature_2)
-      out <- paste0(pretty_weights,
-        "(",
-        k[i], " * ",
-        k[interactions],
-        ")",
-        sep = ""
-      ) %>%
-        paste0(., collapse = " ")
-      return(out)
-    }
-
-    out <- sapply(seq_len(ncol(mat)),
-      FUN = tgp_single_interaction,
-      m = mat,
-      k = cnames
-    ) %>%
-      do.call("paste0", .)
-  }
-
   # simulate from copula
   sim_mat <- sim_copula(
     n_obs = n,
@@ -412,13 +360,6 @@ simulate <- function(object,
       sample_interactions(int_mat[!no_weight_idx, !no_weight_idx])
   }
 
-  # generate the equation for the target generating process
-  # the main effects
-  tgp_main <- tgp_main_effects(mat = int_mat, cnames = colnames(sim_mat))
-
-  # the interaction effects
-  tgp_interact <- tgp_interactions(mat = int_mat, cnames = colnames(sim_mat))
-
   # create target ----
   target <- trans_mat %>%
     as.matrix() %*%
@@ -435,8 +376,7 @@ simulate <- function(object,
     # simulate intercept
     # use a percentage of the maximum value of the target
     intercept <- max(abs(target)) * sample(seq(-2e-1, 2e-1, 11e-2), size = 1)
-    # prepare the stringt for the target generating process (intercept)
-    tgp_intercept <- paste0("y = ", round(intercept, 3))
+
     # add the intercept to the process
     target <- target + intercept
 
@@ -459,9 +399,6 @@ simulate <- function(object,
     # add intercept to the simulation matrix
     sim_intercept <- tibble(intercept = rep(1, nrow(sim_mat)))
   } else {
-    # prepare the stringt for the target generating process (no intercept)
-    tgp_intercept <- "y = "
-
     # add intercept to the simulation matrix
     sim_intercept <- NULL
   }
@@ -534,25 +471,6 @@ simulate <- function(object,
       ~ mutate(., y = as.integer(y))
     )
 
-  # build tgp part for the error
-  book_e <- book %>% filter(type == "noise")
-  params <- book_e %>% pull(params)
-  fam_name <- book_e %>% pull(family)
-  name_e <- paste0(
-    "e ~ ", fam_name, "(",
-    params[[1]] %>%
-      paste0(names(.),
-        " = ",
-        .,
-        collapse = ", "
-      ),
-    ")"
-  )
-  tgp_error <- paste0("+ ", "(", as.character(round(error_weights$par, 2)), name_e, ")")
-
-  # finish target generating process
-  tgp <- paste(tgp_intercept, tgp_main, tgp_interact, tgp_error)
-
   # setting names
   colnames(int_mat) <- colnames(data)
 
@@ -586,8 +504,7 @@ simulate <- function(object,
       family = NA_character_
     )),
     r_sq = r_squared,
-    cor = cor_interval,
-    tgp = tgp
+    cor = cor_interval
   )
 
   class(out) <- "xy_sim"
