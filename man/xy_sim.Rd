@@ -53,8 +53,8 @@ features are added as well.
 \examples{
 # create a simulation
 linear_sim <- Xy() \%>\%
-add_linear(p = 5) \%>\%
-simulate(n=100)
+  add_linear(p = 5) \%>\%
+  simulate(n = 100)
 
 # print the simulation
 simulation_info <- linear_sim \%>\% print()
@@ -69,6 +69,6 @@ simulation_plot <- linear_sim \%>\% plot()
 # e.g. nonlinear features are scaled by their functions.
 transformed_simulation <- linear_sim \%>\% transform()
 
-# fetch the formula 
+# fetch the formula
 eqn <- linear_sim \%>\% equation()
 }

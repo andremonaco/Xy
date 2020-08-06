@@ -13,8 +13,8 @@
 #' @examples
 #' # create a simulation
 #' linear_sim <- Xy() %>%
-#' add_linear(p = 5) %>%
-#' simulate(n=100)
+#'   add_linear(p = 5) %>%
+#'   simulate(n = 100)
 #' # fetch the target
 #' y <- linear_sim %>% pull_y()
 #' # fetch all features
@@ -28,12 +28,12 @@ NULL
 #' @export
 #' @name pulls
 pull_x <- function(object) {
-  
+
   # check input
   if (!inherits(object, "xy_sim")) {
     rlang::abort("object must be of class xy_sim")
   }
-  
+
   out <- object$data %>%
     select(-y, -e)
   return(out)
@@ -42,12 +42,12 @@ pull_x <- function(object) {
 #' @export
 #' @name pulls
 pull_y <- function(object) {
-  
+
   # check input
   if (!inherits(object, "xy_sim")) {
     rlang::abort("object must be of class xy_sim")
   }
-  
+
   out <- object$data %>%
     select(y)
   return(out)
@@ -56,12 +56,12 @@ pull_y <- function(object) {
 #' @export
 #' @name pulls
 pull_e <- function(object) {
-  
+
   # check input
   if (!inherits(object, "xy_sim")) {
     rlang::abort("object must be of class xy_sim")
   }
-  
+
   out <- object$data %>%
     select(e)
   return(out)
@@ -70,12 +70,12 @@ pull_e <- function(object) {
 #' @export
 #' @name pulls
 pull_xy <- function(object) {
-  
+
   # check input
   if (!inherits(object, "xy_sim")) {
     rlang::abort("object must be of class xy_sim")
   }
-  
+
   out <- object$data %>%
     select(-e)
   return(out)
@@ -84,12 +84,12 @@ pull_xy <- function(object) {
 #' @export
 #' @name pulls
 pull_xye <- function(object) {
-  
+
   # check input
   if (!inherits(object, "xy_sim")) {
     rlang::abort("object must be of class xy_sim")
   }
-  
+
   out <- object$data
   return(out)
 }

@@ -37,8 +37,8 @@ extract out of the simulation
 \examples{
 # create a simulation
 linear_sim <- Xy() \%>\%
-add_linear(p = 5) \%>\%
-simulate(n=100)
+  add_linear(p = 5) \%>\%
+  simulate(n = 100)
 # fetch the target
 y <- linear_sim \%>\% pull_y()
 # fetch all features

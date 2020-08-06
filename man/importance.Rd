@@ -27,8 +27,8 @@ over the whole simulated data set
 \examples{
 # create a simulation
 linear_sim <- Xy() \%>\%
-add_linear(p = 5) \%>\%
-Xy::simulate(n=100)
+  add_linear(p = 5) \%>\%
+  Xy::simulate(n = 100)
 # fetch the variable importance of the simualtion
 linear_sim \%>\% importance()
 }

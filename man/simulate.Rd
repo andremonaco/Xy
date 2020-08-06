@@ -59,11 +59,9 @@ upper bound of achievable adjusted r_squared.
 \examples{
 # create a recipe
 recipe <- Xy() \%>\%
-add_linear(p = 5, family = xy_weibull())
+  add_linear(p = 5, family = xy_weibull())
 # cook the recipe
 recipe \%>\% simulate(n = 10)
-
-
 }
 \author{
 Andre Bleier (\email{andre.bleier@statworx.com})

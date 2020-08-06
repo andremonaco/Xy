@@ -57,32 +57,31 @@ a uniform distribution with minimum value of 0 and maximum value of
 }
 \examples{
 xy_recipe <- Xy(task = "regression") \%>\%
-# add linear features
-add_linear(p = 5)
+  # add linear features
+  add_linear(p = 5)
 
 # add cubic nonlinear features
 xy_recipe <- xy_recipe \%>\%
-add_nonlinear(p = 3, nlfun = function(x) x^3, family = xy_uniform(min = 0, max = 1000))
+  add_nonlinear(p = 3, nlfun = function(x) x^3, family = xy_uniform(min = 0, max = 1000))
 
 # add discrete features with four unique factor levels
 xy_recipe <- xy_recipe \%>\%
-add_discrete(p = 2, levels = 4)
+  add_discrete(p = 2, levels = 4)
 
 # add uninformative features (they do not influence the target generating process)
 xy_recipe <- xy_recipe \%>\%
-add_uninformative(p = 5)
+  add_uninformative(p = 5)
 
 # add features from the cauchy distribution
 xy_recipe <- xy_recipe \%>\%
-add_linear(p=2, family = xy_cauchy(location = 3, scale = 5))
+  add_linear(p = 2, family = xy_cauchy(location = 3, scale = 5))
 
 # add random interactions between all informative features
 xy_recipe <- xy_recipe \%>\%
-add_interactions()
+  add_interactions()
 
 # add a specific form of noise to your process, e.g. poisson distributed
 # noise
 xy_recipe <- xy_recipe \%>\%
-add_noise(family = xy_poisson(lambda = 3))
-
+  add_noise(family = xy_poisson(lambda = 3))
 }

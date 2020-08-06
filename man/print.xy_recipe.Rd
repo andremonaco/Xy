@@ -17,6 +17,6 @@ Print method for an object of class \code{xy_recipe}
 \examples{
 # print a simulation recipe
 Xy() \%>\%
-add_linear(p = 5) \%>\%
-print()
+  add_linear(p = 5) \%>\%
+  print()
 }

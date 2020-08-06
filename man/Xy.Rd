@@ -29,7 +29,7 @@ method.
 \examples{
 # create a recipe
 recipe <- Xy() \%>\%
-add_linear(p = 5, family = xy_normal())
+  add_linear(p = 5, family = xy_normal())
 }
 \author{
 Andre Bleier (\email{andre.bleier@statworx.com})

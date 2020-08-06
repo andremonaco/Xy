@@ -116,12 +116,14 @@ family, i.e. for the normal distribution \code{\link{pnorm}}.
 \examples{
 # build a simulation recipe with linear features from the cauchy distribution
 xy_recipe <- Xy(task = "regression") \%>\%
-# add linear features with the desired distribution
-add_linear(p = 5, family = xy_cauchy(location = 0, scale = 3))
+  # add linear features with the desired distribution
+  add_linear(p = 5, family = xy_cauchy(location = 0, scale = 3))
+
 # build a simulation recipe with squared nonlinear features from the normal distribution
 xy_recipe <- Xy(task = "regression") \%>\%
-# add nonlinear features with the desired distribution
-add_nonlinear(p = 5, nlfun = function(x) x^2, 
-              family = xy_normal(mean = 0, sd = 3))
-
+  # add nonlinear features with the desired distribution
+  add_nonlinear(
+    p = 5, nlfun = function(x) x^2,
+    family = xy_normal(mean = 0, sd = 3)
+  )
 }
