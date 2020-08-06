@@ -11,3 +11,5 @@ img
 ^docs$
 ^pkgdown$
 ^\.travis\.yml$
+.pre-commit-config.yaml
+^\.pre-commit-config\.yaml$
