@@ -11,7 +11,7 @@
 #'                         This function is mostly used internally, however,
 #'                         exposed to the user as it could be needed in edge
 #'                         cases.
-#' * `equation.xy_sim()`: Will return a formula object which can be forwarded
+#' * `formula.xy_sim()`: Will return a formula object which can be forwarded
 #'                        to the machine learning algorithm. Note: Uninformative
 #'                        features are added as well.
 #' @rdname xy_sim
@@ -47,7 +47,7 @@
 #' transformed_simulation <- linear_sim %>% transform()
 #'
 #' # fetch the formula
-#' eqn <- linear_sim %>% equation()
+#' eqn <- linear_sim %>% formula()
 #' @name xy_sim
 #'
 NULL
@@ -347,7 +347,7 @@ transform.xy_sim <- function(`_data`, ...) {
 
 #' @export
 #' @name xy_sim
-equation <- function(object, ...) {
-  out <- object$eq
+formula.xy_sim <- function(x, ...) {
+  out <- x$eq
   return(out)
 }

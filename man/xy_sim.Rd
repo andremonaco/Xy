@@ -6,7 +6,7 @@
 \alias{coef.xy_sim}
 \alias{plot.xy_sim}
 \alias{transform.xy_sim}
-\alias{equation}
+\alias{formula.xy_sim}
 \title{Methods of the class \code{\link[=Xy]{xy_sim}}}
 \usage{
 \method{print}{xy_sim}(x, ...)
@@ -17,7 +17,7 @@
 
 \method{transform}{xy_sim}(`_data`, ...)
 
-equation(object, ...)
+\method{formula}{xy_sim}(x, ...)
 }
 \arguments{
 \item{x}{an object of class \code{\link[=Xy]{xy_sim}}}
@@ -45,7 +45,7 @@ effects and multiply the X by its beta coefficient.
 This function is mostly used internally, however,
 exposed to the user as it could be needed in edge
 cases.
-\item \code{equation.xy_sim()}: Will return a formula object which can be forwarded
+\item \code{formula.xy_sim()}: Will return a formula object which can be forwarded
 to the machine learning algorithm. Note: Uninformative
 features are added as well.
 }
@@ -70,5 +70,5 @@ simulation_plot <- linear_sim \%>\% plot()
 transformed_simulation <- linear_sim \%>\% transform()
 
 # fetch the formula
-eqn <- linear_sim \%>\% equation()
+eqn <- linear_sim \%>\% formula()
 }
