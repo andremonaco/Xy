@@ -175,31 +175,31 @@ features are added as well.</p></li>
   <span class='fu'><a href='simulate.html'>simulate</a></span>(<span class='kw'>n</span> <span class='kw'>=</span> <span class='fl'>100</span>)
 
 <span class='co'># print the simulation</span>
-<span class='no'>simulation_info</span> <span class='kw'>&lt;-</span> <span class='no'>linear_sim</span> <span class='kw'>%&gt;%</span> <span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span>()</div><div class='output co'>#&gt; Xy Simulation 
-#&gt; 
-#&gt; recipe
-#&gt; ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬ 
-#&gt; ‣ task regression
-#&gt; ✘ interactions 
-#&gt; ✘ intercept 
-#&gt; ✔ linear        5 
-#&gt; ✔ nonlinear      
+<span class='no'>simulation_info</span> <span class='kw'>&lt;-</span> <span class='no'>linear_sim</span> <span class='kw'>%&gt;%</span> <span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span>()</div><div class='output co'>#&gt; <span style='font-weight: bold;'>Xy Simulation 
+#&gt; </span><span>
+#&gt; </span><span style='font-weight: bold;'>recipe
+#&gt; </span><span>▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬ 
+#&gt; ‣ task </span><span style='color: #BBBB00;font-weight: bold;'>regression</span><span>
+#&gt; </span><span style='color: #BB0000;'>✘</span><span> interactions 
+#&gt; </span><span style='color: #BB0000;'>✘</span><span> intercept 
+#&gt; </span><span style='color: #00BB00;'>✔</span><span> linear        </span><span style='color: #BBBB00;font-weight: bold;'>5</span><span> 
+#&gt; </span><span style='color: #00BB00;'>✔</span><span> nonlinear      
 #&gt;  discrete       
 #&gt;  uninformative  
-#&gt; ✔ noise         e ~ norm(mean = 0, sd = 3) 
+#&gt; </span><span style='color: #00BB00;'>✔</span><span> noise         </span><span style='color: #BBBB00;font-weight: bold;'>e ~ norm(mean = 0, sd = 3)</span><span> 
 #&gt; 
-#&gt; simulation
-#&gt; ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬ 
-#&gt; ‣ n                    100 
-#&gt; ‣ r-squared            0.8 
-#&gt; ‣ correlation interval [-0.5, 0.5] 
-#&gt; ‣ noise                e ~ norm(mean = 0, sd = 3) 
+#&gt; </span><span style='font-weight: bold;'>simulation
+#&gt; </span><span>▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬ 
+#&gt; ‣ n                    </span><span style='color: #BBBB00;font-weight: bold;'>100</span><span> 
+#&gt; ‣ r-squared            </span><span style='color: #BBBB00;font-weight: bold;'>0.8</span><span> 
+#&gt; ‣ correlation interval </span><span style='color: #BBBB00;font-weight: bold;'>[-0.5, 0.5]</span><span> 
+#&gt; ‣ noise                </span><span style='color: #BBBB00;font-weight: bold;'>e ~ norm(mean = 0, sd = 3)</span><span> 
 #&gt; 
-#&gt; Target generating process: 
-#&gt; y =  - 1 x_1
-#&gt; + 0.48 x_2		+ 2.6 x_3		- 2.5 x_4
+#&gt; </span><span style='font-weight: bold;'>Target generating process:</span><span> 
+#&gt; </span><span style='font-weight: bold;'>y</span><span> =  </span><span style='color: #BB0000;'>-</span><span> </span><span style='color: #BB0000;'>1</span><span> x_1
+#&gt; + 0.48 x_2		+ 2.6 x_3		</span><span style='color: #BB0000;'>-</span><span> </span><span style='color: #BB0000;'>2.5</span><span> x_4
 #&gt; + 0.39 x_5  
-#&gt; + e ~ norm(mean = 0, sd = 3)</div><div class='input'>
+#&gt; + </span><span style='font-weight: bold;'>e ~ norm(mean = 0, sd = 3)</span><span></div><div class='input'>
 <span class='co'># get the coefficients of the features</span>
 <span class='no'>simulation_coefs</span> <span class='kw'>&lt;-</span> <span class='no'>linear_sim</span> <span class='kw'>%&gt;%</span> <span class='fu'><a href='https://rdrr.io/r/stats/coef.html'>coef</a></span>()
 
@@ -210,7 +210,7 @@ features are added as well.</p></li>
 <span class='no'>transformed_simulation</span> <span class='kw'>&lt;-</span> <span class='no'>linear_sim</span> <span class='kw'>%&gt;%</span> <span class='fu'><a href='https://rdrr.io/r/base/transform.html'>transform</a></span>()
 
 <span class='co'># fetch the formula</span>
-<span class='no'>eqn</span> <span class='kw'>&lt;-</span> <span class='no'>linear_sim</span> <span class='kw'>%&gt;%</span> <span class='fu'><a href='https://rdrr.io/r/stats/formula.html'>formula</a></span>()</div></pre>
+<span class='no'>eqn</span> <span class='kw'>&lt;-</span> <span class='no'>linear_sim</span> <span class='kw'>%&gt;%</span> <span class='fu'><a href='https://rdrr.io/r/stats/formula.html'>formula</a></span>()</div></span></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
