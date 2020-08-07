@@ -175,21 +175,30 @@ features are added as well.</p></li>
 
 <span class='co'># print the simulation</span>
 <span class='no'>simulation_info</span> <span class='kw'>&lt;-</span> <span class='no'>linear_sim</span> <span class='kw'>%&gt;%</span> <span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span>()</div><div class='output co'>#&gt; Xy Simulation 
-#&gt;  	 | 
-#&gt;  	 | + task regression
-#&gt;  	 | + interactions 1D
-#&gt;  	 | + effects 
-#&gt;  	   | - linear 5
-#&gt;  	   | - nonlinear 
-#&gt;  	   | - discrete 
-#&gt;  	   | - noise e ~ norm(mean = 0, sd = 3)
-#&gt;  	 | + simulation 
-#&gt;  	   | - n 100
-#&gt;  	   | - r-squared 0.8
-#&gt;  	   | - correlation interval [-0.5, 0.5]
 #&gt; 
+#&gt; recipe
+#&gt; ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬ 
+#&gt; ‣ task regression
+#&gt; ✘ interactions 
+#&gt; ✘ intercept 
+#&gt; ✔ linear        5 
+#&gt; ✔ nonlinear      
+#&gt;  discrete       
+#&gt;  uninformative  
+#&gt; ✔ noise         e ~ norm(mean = 0, sd = 3) 
 #&gt; 
-#&gt; y = -1x_1 +0.48x_2 +2.6x_3 -2.5x_4 +0.39x_5 + e ~ norm(mean = 0, sd = 3)</div><div class='input'>
+#&gt; simulation
+#&gt; ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬ 
+#&gt; ‣ n                    100 
+#&gt; ‣ r-squared            0.8 
+#&gt; ‣ correlation interval [-0.5, 0.5] 
+#&gt; ‣ noise                e ~ norm(mean = 0, sd = 3) 
+#&gt; 
+#&gt; Target generating process: 
+#&gt; y =  - 1 x_1
+#&gt; + 0.48 x_2		+ 2.6 x_3		- 2.5 x_4
+#&gt; + 0.39 x_5  
+#&gt; + e ~ norm(mean = 0, sd = 3)</div><div class='input'>
 <span class='co'># get the coefficients of the features</span>
 <span class='no'>simulation_coefs</span> <span class='kw'>&lt;-</span> <span class='no'>linear_sim</span> <span class='kw'>%&gt;%</span> <span class='fu'><a href='https://rdrr.io/r/stats/coef.html'>coef</a></span>()
 

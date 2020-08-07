@@ -189,21 +189,30 @@ upper bound of achievable adjusted r_squared.</p></li>
   <span class='fu'><a href='add_effects.html'>add_linear</a></span>(<span class='kw'>p</span> <span class='kw'>=</span> <span class='fl'>5</span>, <span class='kw'>family</span> <span class='kw'>=</span> <span class='fu'><a href='families.html'>xy_weibull</a></span>())
 <span class='co'># cook the recipe</span>
 <span class='no'>recipe</span> <span class='kw'>%&gt;%</span> <span class='fu'>simulate</span>(<span class='kw'>n</span> <span class='kw'>=</span> <span class='fl'>10</span>)</div><div class='output co'>#&gt; Xy Simulation 
-#&gt;  	 | 
-#&gt;  	 | + task regression
-#&gt;  	 | + interactions 1D
-#&gt;  	 | + effects 
-#&gt;  	   | - linear 5
-#&gt;  	   | - nonlinear 
-#&gt;  	   | - discrete 
-#&gt;  	   | - noise e ~ norm(mean = 0, sd = 3)
-#&gt;  	 | + simulation 
-#&gt;  	   | - n 10
-#&gt;  	   | - r-squared 0.8
-#&gt;  	   | - correlation interval [-0.5, 0.5]
 #&gt; 
+#&gt; recipe
+#&gt; ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬ 
+#&gt; ‣ task regression
+#&gt; ✘ interactions 
+#&gt; ✘ intercept 
+#&gt; ✔ linear        5 
+#&gt; ✔ nonlinear      
+#&gt;  discrete       
+#&gt;  uninformative  
+#&gt; ✔ noise         e ~ norm(mean = 0, sd = 3) 
 #&gt; 
-#&gt; y = +3.6x_1 +1.6x_2 +2.6x_3 +0.8x_4 +0.55x_5 + e ~ norm(mean = 0, sd = 3)</div></pre>
+#&gt; simulation
+#&gt; ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬ 
+#&gt; ‣ n                    10 
+#&gt; ‣ r-squared            0.8 
+#&gt; ‣ correlation interval [-0.5, 0.5] 
+#&gt; ‣ noise                e ~ norm(mean = 0, sd = 3) 
+#&gt; 
+#&gt; Target generating process: 
+#&gt; y =  + 3.6 x_1
+#&gt; + 1.6 x_2		+ 2.6 x_3		+ 0.8 x_4
+#&gt; + 0.55 x_5  
+#&gt; + e ~ norm(mean = 0, sd = 3)</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
