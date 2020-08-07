@@ -49,6 +49,10 @@ jobs:
 
       - uses: r-lib/actions/setup-pandoc@master
 
+      - name: Install Linux Dependency
+        if: runner.os == 'Linux'
+        run: sudo apt-get install libgsl-dev
+
       - name: Query dependencies
         run: |
           install.packages('remotes')
