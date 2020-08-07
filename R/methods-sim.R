@@ -20,7 +20,8 @@
 #' @param _data an object of class [`xy_sim`][Xy()]
 #' @param ... additional parameters
 #' @import ggplot2 dplyr tibble
-#' @importFrom crayon bold red underline
+#' @importFrom crayon bold red green yellow
+#' @importFrom stringr str_pad
 #' @importFrom glue glue
 #' @importFrom tidyr gather
 #' @importFrom purrr map2
@@ -61,8 +62,11 @@ print.xy_sim <- function(x, ...) {
   # fetch the simulation recipe
   book <- x$book
 
-  # extract interactions
-  interactions <- ifelse(x$interactions, 2, 1)
+  # define variable style
+  var_style <- bold$yellow
+
+  # check screen width
+  screen_width <- as.integer(getOption("width") / 3)
 
   # extract quantity
   n_vars <- book %>%
@@ -90,20 +94,40 @@ print.xy_sim <- function(x, ...) {
 
   # prepare target generating process
   # generate the equation for the target generating process
-  tgp_main_effects <- function(data) {
+  tgp_main_effects <- function(x) {
+
+    # fetch data
+    data <- x$psi
+
+    # early exit if there are no main effects
+    if (sum(diag(x$psi)) == 0) {
+      return(character())
+    }
+
     idx <- str_detect(colnames(data), "random|^y$|^e$")
     col_names <- colnames(data)[!idx]
     raw_weights <- diag(data)[!idx]
     col_names[which(col_names == "intercept")] <- ""
     weights <- ifelse(raw_weights < 0,
-      paste0("{red(-", prettyNum(signif(abs(raw_weights), 2)), ")}"),
-      paste0("+", prettyNum(signif(raw_weights, 2)))
+      paste("{red(\"-\")}", paste("{red(", prettyNum(signif(abs(raw_weights), 2)), ")}")),
+      paste("+", prettyNum(signif(raw_weights, 2)))
     )
-    out <- paste0(weights, paste0("{bold(\"", col_names, "\")}"), collapse = " ")
+    out <- paste(weights, paste0("{\"", col_names, "\"}"))
+
+    out[seq(1, length(out), 3)] <- paste0(out[seq(1, length(out), 3)], "\n")
+    out <- paste0(out, collapse = "\t\t")
     return(out)
   }
 
-  tgp_interactions <- function(data) {
+  tgp_interactions <- function(x) {
+
+    # fetch the interaction
+    data <- x$psi
+
+    # early exit if there are no interactions
+    if (!x$interactions) {
+      return(character())
+    }
     # overwrite main effects
     diag(data) <- 0
     # fetch names
@@ -122,8 +146,8 @@ print.xy_sim <- function(x, ...) {
 
       # prettify the weights
       pretty_weights <- ifelse(m[interactions, i] < 0,
-        paste0("red(- ", abs(m[interactions, i]), ")"),
-        paste0("+ ", m[interactions, i])
+        paste0("red(- ", signif(abs(m[interactions, i]), 2), ")"),
+        paste0("+ ", signif(m[interactions, i], 2))
       )
 
       # paste together weights (feature_1 * feature_2)
@@ -142,57 +166,107 @@ print.xy_sim <- function(x, ...) {
       FUN = tgp_single_interaction,
       m = data,
       k = col_names
-    ) %>%
-      do.call("paste0", .)
+    )
+
+    out[seq(1, length(out), 3)] <- paste0(out[seq(1, length(out), 3)], "\n")
+
+    out <- paste0(out, collapse = " ")
+    return(out)
   }
 
   # filter out random vars, noise and target
 
   # the main effects
-  tgp_main <- tgp_main_effects(data = x$psi)
+  tgp_main <- tgp_main_effects(x = x)
 
   # the interaction effects
-  tgp_interact <- tgp_interactions(data = x$psi)
+  tgp_interact <- tgp_interactions(x = x)
 
   tgp_error <- paste0(" + {bold(print_e)}")
 
   tgp_start <- "{bold(\"y\")} = "
 
-  tgp <- paste0(tgp_start, tgp_main, tgp_interact, tgp_error, collapse = " ")
+  tgp <- paste(tgp_start, tgp_main, tgp_interact, "\n", tgp_error)
 
   # summary ----
   cat(bold(paste0("Xy Simulation \n")))
-  cat(paste0(" \t | \n"))
-  cat(paste0(" \t | + task ", red(x$task), "\n"))
-  cat(paste0(" \t | + interactions ", red(paste0(interactions, "D")), "\n"))
+  cat(paste0("\n"))
+  cat(bold("recipe\n"))
+  cat(paste0(rep("\u25AC", screen_width), collapse = ""), "\n")
+  cat(paste0("\u2023 task ", var_style(x$task), "\n"))
+  interactions <- ifelse(x$interactions, green("\u2714"), red("\u2718"))
+  cat(paste(interactions, "interactions", "\n"))
+
+  # intercept
+  pre_int <- ifelse("intercept" %in% (x$book %>% pull(name)), green("\u2714"), red("\u2718"))
+
+  # print intercept
+  cat(paste(pre_int, "intercept", "\n"))
 
   # effects -----
-  cat(paste0(" \t | + effects \n"))
-  cat(paste0(" \t   | - linear ", n_vars %>%
-    filter(type == "linear") %>%
-    pull(n) %>% red(), "\n"))
-  cat(paste0(" \t   | - nonlinear ", n_vars %>%
-    filter(type == "nonlinear") %>%
-    pull(n) %>% red(), "\n"))
-  cat(paste0(" \t   | - discrete ", n_vars %>%
-    filter(type == "discrete") %>%
-    pull(n) %>% red(), "\n"))
-  if ("intercept" %in% (book %>% pull(name))) {
-    cat(paste0(" \t   | - intercept\n"))
-  }
 
-  cat(paste0(" \t   | - noise ", red(print_e), "\n"))
+  # extract maximum characters for console output
+  nchar_max_var <- nchar("uninformative")
+
+  # linear
+  lin <- n_vars %>%
+    filter(type == "linear") %>%
+    pull(n)
+  pre_lin <- ifelse(lin == 0, red("\u2718"), green("\u2714"))
+
+  # print lin
+  cat(paste(pre_lin, str_pad("linear", nchar_max_var, side = "right"), var_style(lin), "\n"))
+
+  # non linear
+  nonlin <- n_vars %>%
+    filter(type == "nonlinear") %>%
+    pull(n)
+  pre_nonlin <- ifelse(nonlin == 0, red("\u2718"), green("\u2714"))
+
+  # print nonlinear
+  cat(paste(pre_lin, str_pad("nonlinear", nchar_max_var, side = "right"), var_style(nonlin), "\n"))
+
+  # discrete
+  discr <- n_vars %>%
+    filter(type == "discrete") %>%
+    pull(n)
+  pre_discr <- ifelse(nonlin == 0, red("\u2718"), green("\u2714"))
+
+  # print discrete
+  cat(paste(pre_discr, str_pad("discrete", nchar_max_var, side = "right"), var_style(discr), "\n"))
+
+  # uninformative
+  rand_vars <- n_vars %>%
+    filter(type == "random") %>%
+    pull(n)
+  pre_rand_vars <- ifelse(rand_vars == 0, red("\u2718"), green("\u2714"))
+
+  # print uninformative
+  cat(paste(pre_rand_vars, "uninformative", var_style(rand_vars), "\n"))
+
+  # print noise
+  cat(paste(green("\u2714"), str_pad("noise", nchar_max_var, side = "right"), var_style(print_e), "\n\n"))
 
   # simulation
-  cat(paste0(" \t | + simulation \n"))
-  cat(paste0(" \t   | - n ", red(nrow(x$data)), "\n"))
-  cat(paste0(" \t   | - r-squared ", red(x$r_sq), "\n"))
-  cat(paste0(" \t   | - correlation interval ", red(paste0("[", min(x$cor), ", ", max(x$cor), "]")), "\n"))
+  max_sim_chars <- nchar("correlation interval")
+  cat(bold("simulation\n"))
+  cat(paste(rep("\u25AC", screen_width), collapse = ""), "\n")
+  cat(paste("\u2023", str_pad("n", max_sim_chars, side = "right"), var_style(nrow(x$data)), "\n"))
+  cat(paste("\u2023", str_pad("r-squared", max_sim_chars, side = "right"), var_style(x$r_sq), "\n"))
+  cat(paste("\u2023 correlation interval", var_style(paste0("[", min(x$cor), ", ", max(x$cor), "]")), "\n"))
+  cat(paste("\u2023", str_pad("noise", max_sim_chars, side = "right"), var_style(print_e), "\n"))
 
   # data generating process ----
   cat("\n")
-  cat("\n")
-  cat(glue(tgp))
+  cat(bold("Target generating process:"), "\n")
+
+  # check if output is printable
+  # do not print if there are more than 50 variables
+  if (x$book %>% nrow() > 50) {
+    cat(italic("Too many variables output omitted. (use object %>% coef())"))
+  } else {
+    cat(glue(tgp))
+  }
   cat("\n")
 
   return(invisible())
