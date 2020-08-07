@@ -477,23 +477,11 @@ simulate <- function(object,
   # overwrite noise with its weight
   diag(int_mat)[which(colnames(int_mat) == "e")] <- error_weights$par
 
-  # create a formula object
-  features <- colnames(data)
-  # omit target, noise and intercept
-  features <- features[-stringr::str_detect("y|intercept", features)]
-  # handle nonlinear features
-  features <- stringr::str_replace(features, "(^f.*)", "`\\1`")
-  # fix intercept term
-  features <- c(ifelse("intercept" %in% colnames(data), "-1", "1"), features)
-  # build equation
-  eq <- formula(paste0("y ~ ", paste0(features, collapse = " + ")))
-
   # add class
   out <- list(
     data = data,
     psi = int_mat %>% as.matrix(),
     task = object$task$type,
-    eq = eq,
     interactions = object$interactions,
     book = bind_rows(book, tibble(
       type = "target",

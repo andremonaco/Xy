@@ -244,7 +244,7 @@ test_that("xy_wilcox", {
 
   # simulation
   sim <- Xy() %>%
-    add_linear(p = 5, family = xy_weibull()) %>%
+    add_linear(p = 5, family = xy_wilcox()) %>%
     simulate(n = 100)
 
   # class

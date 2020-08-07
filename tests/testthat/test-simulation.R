@@ -1,6 +1,6 @@
 context("Test Xy Simulation")
 
-test_that("minimal", {
+test_that("regression", {
 
   # simulation
   sim <- Xy() %>%
@@ -20,10 +20,28 @@ test_that("minimal", {
   expect_equal(nrow(psi), ncol(psi))
   expect_that(psi, is_a("matrix"))
   expect_equal(sum(psi[lower.tri(psi, diag = FALSE)]), 0)
+})
 
-  # equation
-  eqn <- sim$eq
-  expect_that(eqn, is_a("formula"))
+test_that("classification", {
+
+  # simulation
+  sim <- Xy(task = "classification") %>%
+    add_linear(p = 5, family = xy_normal()) %>%
+    simulate(n = 100)
+
+  # class
+  expect_s3_class(sim, "xy_sim")
+
+  # data
+  expect_equal(nrow(sim$data), 100)
+  expect_equal(ncol(sim$data), 7)
+
+  # psi
+  psi <- sim$psi
+  expect_equal(nrow(psi), 7)
+  expect_equal(nrow(psi), ncol(psi))
+  expect_that(psi, is_a("matrix"))
+  expect_equal(sum(psi[lower.tri(psi, diag = FALSE)]), 0)
 })
 
 test_that("user specified correlation matrix", {
@@ -52,10 +70,33 @@ test_that("user specified correlation matrix", {
   expect_equal(nrow(psi), ncol(psi))
   expect_that(psi, is_a("matrix"))
   expect_equal(sum(psi[lower.tri(psi, diag = FALSE)]), 0)
+})
 
-  # equation
-  eqn <- sim$eq
-  expect_that(eqn, is_a("formula"))
+test_that("full_blown", {
+
+  # simulation
+  sim <- Xy() %>%
+    add_linear(p = 5, family = xy_normal()) %>%
+    add_nonlinear(p = 5, family = xy_normal()) %>%
+    add_discrete(p = 2, level = 2) %>%
+    add_uninformative(p = 5, family = xy_uniform()) %>%
+    add_interactions() %>%
+    add_intercept() %>%
+    simulate(n = 100)
+
+  # class
+  expect_s3_class(sim, "xy_sim")
+
+  # data
+  expect_equal(nrow(sim$data), 100)
+  expect_equal(ncol(sim$data), 20)
+
+  # psi
+  psi <- sim$psi
+  expect_equal(nrow(psi), 20)
+  expect_equal(nrow(psi), ncol(psi))
+  expect_that(psi, is_a("matrix"))
+  expect_true(any(psi[lower.tri(psi, diag = FALSE)] != 0))
 })
 
 test_that("interactions", {
@@ -78,10 +119,7 @@ test_that("interactions", {
   expect_equal(nrow(psi), 7)
   expect_equal(nrow(psi), ncol(psi))
   expect_that(psi, is_a("matrix"))
-
-  # equation
-  eqn <- sim$eq
-  expect_that(eqn, is_a("formula"))
+  expect_true(any(psi[lower.tri(psi, diag = FALSE)] != 0))
 })
 
 test_that("print", {
@@ -149,4 +187,17 @@ test_that("transform", {
   expect_equal(nrow(trans), 100)
   expect_equal(ncol(trans), 7)
   expect_equal(colnames(trans), colnames(sim$data))
+})
+
+test_that("formula", {
+
+  # simulation
+  eq <- Xy() %>%
+    add_linear(p = 5, family = xy_normal()) %>%
+    add_interactions() %>%
+    simulate(n = 100) %>%
+    formula.xy_sim()
+
+  # class
+  expect_is(eq, "formula")
 })

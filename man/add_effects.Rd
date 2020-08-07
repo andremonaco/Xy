@@ -13,7 +13,7 @@
 \usage{
 add_linear(object, p, family = xy_normal())
 
-add_nonlinear(object, p, nlfun, family = xy_normal())
+add_nonlinear(object, p, nlfun = function(x) x^2, family = xy_normal())
 
 add_discrete(object, p, levels = 2)
 

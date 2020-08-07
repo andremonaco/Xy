@@ -81,7 +81,7 @@ add_linear <- function(object, p, family = xy_normal()) {
 
 #' @export
 #' @rdname add_effects
-add_nonlinear <- function(object, p, nlfun, family = xy_normal()) {
+add_nonlinear <- function(object, p, nlfun = function(x) x^2, family = xy_normal()) {
 
   # fetch nonlinear book entries
   b_nl <- object$book %>%

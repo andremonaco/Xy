@@ -20,7 +20,7 @@
 #' @param _data an object of class [`xy_sim`][Xy()]
 #' @param ... additional parameters
 #' @import ggplot2 dplyr tibble
-#' @importFrom crayon bold red green yellow
+#' @importFrom crayon bold red green yellow italic
 #' @importFrom stringr str_pad
 #' @importFrom glue glue
 #' @importFrom tidyr gather
@@ -348,6 +348,19 @@ transform.xy_sim <- function(`_data`, ...) {
 #' @export
 #' @name xy_sim
 formula.xy_sim <- function(x, ...) {
-  out <- x$eq
+
+  # fetch the data
+  data <- x$data
+  # create a formula object
+  features <- colnames(data)
+  # omit target, noise and intercept
+  features <- features[!stringr::str_detect("^y$|intercept|^e$", features)]
+  # handle nonlinear features
+  features <- stringr::str_replace(features, "(^f.*)", "`\\1`")
+  # fix intercept term
+  features <- c(ifelse("intercept" %in% colnames(data), "-1", "1"), features)
+  # build equation
+  out <- formula(paste0("y ~ ", paste0(features, collapse = " + ")))
+
   return(out)
 }
