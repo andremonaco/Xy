@@ -13,3 +13,5 @@ img
 ^\.travis\.yml$
 .pre-commit-config.yaml
 ^\.pre-commit-config\.yaml$
+^codecov\.yml$
+^\.github$

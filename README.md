@@ -1,4 +1,4 @@
-[![Build Status](https://img.shields.io/travis/andrebleier/Xy/master.svg)](https://travis-ci.org/andrebleier/Xy)   [![codecov](https://codecov.io/github/andrebleier/Xy/branch/master/graphs/badge.svg)](https://codecov.io/github/andrebleier/Xy) 
+[![R build status](https://github.com/andrebleier/Xy/workflows/R-CMD-check/badge.svg)](https://github.com/andrebleier/Xy/actions)   [![codecov](https://codecov.io/github/andrebleier/Xy/branch/master/graphs/badge.svg)](https://codecov.io/github/andrebleier/Xy) 
 
 Simulating Supervised Learning Data <img src="https://github.com/andrebleier/Xy/raw/master/man/figures/Xy.png" alt="drawing" width="150px" align="right"/> 
 ===================================
@@ -91,4 +91,3 @@ variable_importance <- sim %>% importance()
 <img src="https://github.com/andrebleier/Xy/raw/master/man/figures/imp.png" alt="drawing"/> 
 
 Feel free to [contact](mailto:andre.bleier@statworx.com) me with input and ideas.
-

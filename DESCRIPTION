@@ -16,19 +16,20 @@ License: MIT + file LICENSE
 Depends: 
     R (>= 3.6)
 Imports: 
-    Matrix,
     copula,
     crayon,
     dplyr,
     ggplot2,
     glue,
     magrittr,
+    Matrix,
     purrr,
     rlang,
     stringr,
     tibble,
     tidyr
 Suggests: 
+    covr,
     testthat
 Encoding: UTF-8
 LazyData: true
