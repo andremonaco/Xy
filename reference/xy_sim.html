@@ -124,7 +124,8 @@
 <span class='co'># S3 method for xy_sim</span>
 <span class='fu'><a href='https://rdrr.io/r/base/transform.html'>transform</a></span>(<span class='no'>`_data`</span>, <span class='no'>...</span>)
 
-<span class='fu'>equation</span>(<span class='no'>object</span>, <span class='no'>...</span>)</pre>
+<span class='co'># S3 method for xy_sim</span>
+<span class='fu'><a href='https://rdrr.io/r/stats/formula.html'>formula</a></span>(<span class='no'>x</span>, <span class='no'>...</span>)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -161,7 +162,7 @@ effects and multiply the X by its beta coefficient.
 This function is mostly used internally, however,
 exposed to the user as it could be needed in edge
 cases.</p></li>
-<li><p><code>equation.xy_sim()</code>: Will return a formula object which can be forwarded
+<li><p><code>formula.xy_sim()</code>: Will return a formula object which can be forwarded
 to the machine learning algorithm. Note: Uninformative
 features are added as well.</p></li>
 </ul>
@@ -209,7 +210,7 @@ features are added as well.</p></li>
 <span class='no'>transformed_simulation</span> <span class='kw'>&lt;-</span> <span class='no'>linear_sim</span> <span class='kw'>%&gt;%</span> <span class='fu'><a href='https://rdrr.io/r/base/transform.html'>transform</a></span>()
 
 <span class='co'># fetch the formula</span>
-<span class='no'>eqn</span> <span class='kw'>&lt;-</span> <span class='no'>linear_sim</span> <span class='kw'>%&gt;%</span> <span class='fu'>equation</span>()</div></pre>
+<span class='no'>eqn</span> <span class='kw'>&lt;-</span> <span class='no'>linear_sim</span> <span class='kw'>%&gt;%</span> <span class='fu'><a href='https://rdrr.io/r/stats/formula.html'>formula</a></span>()</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
