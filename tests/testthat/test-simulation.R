@@ -1,5 +1,8 @@
 context("Test Xy Simulation")
 
+# setting seed
+set.seed(1234)
+
 test_that("regression", {
 
   # simulation
@@ -102,7 +105,7 @@ test_that("full_blown", {
 test_that("interactions", {
 
   # simulation
-  sim <- sim <- Xy() %>%
+  sim <- Xy() %>%
     add_linear(p = 5, family = xy_normal()) %>%
     add_interactions() %>%
     simulate(n = 100)
