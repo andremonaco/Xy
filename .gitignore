@@ -11,4 +11,4 @@ README.html
 docs
 docs/
 _pkgdown.yml
-*.yaml
+.pre-commit-config.yaml
