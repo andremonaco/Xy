@@ -82,7 +82,8 @@ simulate <- function(object,
       name = paste(name, 1:n(), sep = "_"),
       name = replace(name, type == "noise", "e")
     ) %>%
-    arrange(type)
+    arrange(type) %>%
+    ungroup()
 
   # extract book
   book <- object$book
