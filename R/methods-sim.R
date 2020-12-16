@@ -358,7 +358,7 @@ formula.xy_sim <- function(x, ...) {
   # handle nonlinear features
   features <- stringr::str_replace(features, "(^f.*)", "`\\1`")
   # fix intercept term
-  features <- c(ifelse("intercept" %in% colnames(data), "-1", "1"), features)
+  features <- c(ifelse("intercept" %in% colnames(data), "1", "-1"), features)
   # build equation
   out <- formula(paste0("y ~ ", paste0(features, collapse = " + ")))
 
