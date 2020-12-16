@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Cook a simulation recipe of <code><a href='Xy.html'>Xy()</a></code> — simulate • Xy</title>
+<title>Cook a simulation recipe of Xy() — simulate • Xy</title>
 
 
 <!-- jquery -->
@@ -39,7 +39,7 @@
 
 
 
-<meta property="og:title" content="Cook a simulation recipe of <code><a href='Xy.html'>Xy()</a></code> — simulate" />
+<meta property="og:title" content="Cook a simulation recipe of Xy() — simulate" />
 <meta property="og:description" content="A function which simulates linear and nonlinear X and a corresponding
 target. The composition of the target is highly customizable.
 Furthermore, the polynomial degree as well as the functional shape of
@@ -85,7 +85,7 @@ determined by the user." />
       <ul class="nav navbar-nav">
         <li>
   <a href="../index.html">
-    <span class="fas fa fas fa-home fa-lg"></span>
+    <span class="fas fa-home fa-lg"></span>
      
   </a>
 </li>
@@ -122,14 +122,14 @@ of the X can either be sampled by the function or specifically
 determined by the user.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>simulate</span>(
-  <span class='no'>object</span>,
-  <span class='kw'>n</span> <span class='kw'>=</span> <span class='fl'>1000</span>,
-  <span class='kw'>r_squared</span> <span class='kw'>=</span> <span class='fl'>0.8</span>,
-  <span class='kw'>cor_interval</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(-<span class='fl'>0.5</span>, <span class='fl'>0.5</span>),
-  <span class='kw'>cor_matrix</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='no'>...</span>
-)</pre>
+    <pre class="usage"><span class='fu'>simulate</span><span class='op'>(</span>
+  <span class='va'>object</span>,
+  n <span class='op'>=</span> <span class='fl'>1000</span>,
+  r_squared <span class='op'>=</span> <span class='fl'>0.8</span>,
+  cor_interval <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='op'>-</span><span class='fl'>0.5</span>, <span class='fl'>0.5</span><span class='op'>)</span>,
+  cor_matrix <span class='op'>=</span> <span class='cn'>NULL</span>,
+  <span class='va'>...</span>
+<span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -182,13 +182,17 @@ Thus, when fitting an ML model, the <code>r_squared</code> is the
 upper bound of achievable adjusted r_squared.</p></li>
 </ul>
 
+    <h2 class="hasAnchor" id="author"><a class="anchor" href="#author"></a>Author</h2>
+
+    <p>Andre Bleier (<a href='mailto:andre.bleier@statworx.com'>andre.bleier@statworx.com</a>)</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='co'># create a recipe</span>
-<span class='no'>recipe</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='Xy.html'>Xy</a></span>() <span class='kw'>%&gt;%</span>
-  <span class='fu'><a href='add_effects.html'>add_linear</a></span>(<span class='kw'>p</span> <span class='kw'>=</span> <span class='fl'>5</span>, <span class='kw'>family</span> <span class='kw'>=</span> <span class='fu'><a href='families.html'>xy_weibull</a></span>())
+<span class='va'>recipe</span> <span class='op'>&lt;-</span> <span class='fu'><a href='Xy.html'>Xy</a></span><span class='op'>(</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
+  <span class='fu'><a href='add_effects.html'>add_linear</a></span><span class='op'>(</span>p <span class='op'>=</span> <span class='fl'>5</span>, family <span class='op'>=</span> <span class='fu'><a href='families.html'>xy_weibull</a></span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span>
 <span class='co'># cook the recipe</span>
-<span class='no'>recipe</span> <span class='kw'>%&gt;%</span> <span class='fu'>simulate</span>(<span class='kw'>n</span> <span class='kw'>=</span> <span class='fl'>10</span>)</div><div class='output co'>#&gt; <span style='font-weight: bold;'>Xy Simulation 
+<span class='va'>recipe</span> <span class='op'>%&gt;%</span> <span class='fu'>simulate</span><span class='op'>(</span>n <span class='op'>=</span> <span class='fl'>10</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; <span style='font-weight: bold;'>Xy Simulation 
 #&gt; </span><span>
 #&gt; </span><span style='font-weight: bold;'>recipe
 #&gt; </span><span>▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬ 
@@ -228,7 +232,7 @@ upper bound of achievable adjusted r_squared.</p></li>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
 </div>
 
       </footer>

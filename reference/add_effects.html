@@ -81,7 +81,7 @@ adding the desired effects to the simulation object from Xy()." />
       <ul class="nav navbar-nav">
         <li>
   <a href="../index.html">
-    <span class="fas fa fas fa-home fa-lg"></span>
+    <span class="fas fa-home fa-lg"></span>
      
   </a>
 </li>
@@ -114,19 +114,19 @@ adding the desired effects to the simulation object from Xy()." />
 adding the desired effects to the simulation object from <code><a href='Xy.html'>Xy()</a></code>.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>add_linear</span>(<span class='no'>object</span>, <span class='no'>p</span>, <span class='kw'>family</span> <span class='kw'>=</span> <span class='fu'><a href='families.html'>xy_normal</a></span>())
+    <pre class="usage"><span class='fu'>add_linear</span><span class='op'>(</span><span class='va'>object</span>, <span class='va'>p</span>, family <span class='op'>=</span> <span class='fu'><a href='families.html'>xy_normal</a></span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span>
 
-<span class='fu'>add_nonlinear</span>(<span class='no'>object</span>, <span class='no'>p</span>, <span class='kw'>nlfun</span> <span class='kw'>=</span> <span class='kw'>function</span>(<span class='no'>x</span>) <span class='no'>x</span>^<span class='fl'>2</span>, <span class='kw'>family</span> <span class='kw'>=</span> <span class='fu'><a href='families.html'>xy_normal</a></span>())
+<span class='fu'>add_nonlinear</span><span class='op'>(</span><span class='va'>object</span>, <span class='va'>p</span>, nlfun <span class='op'>=</span> <span class='kw'>function</span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span> <span class='va'>x</span><span class='op'>^</span><span class='fl'>2</span>, family <span class='op'>=</span> <span class='fu'><a href='families.html'>xy_normal</a></span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span>
 
-<span class='fu'>add_discrete</span>(<span class='no'>object</span>, <span class='no'>p</span>, <span class='kw'>levels</span> <span class='kw'>=</span> <span class='fl'>2</span>)
+<span class='fu'>add_discrete</span><span class='op'>(</span><span class='va'>object</span>, <span class='va'>p</span>, levels <span class='op'>=</span> <span class='fl'>2</span><span class='op'>)</span>
 
-<span class='fu'>add_uninformative</span>(<span class='no'>object</span>, <span class='no'>p</span>, <span class='kw'>collinearity</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>family</span> <span class='kw'>=</span> <span class='fu'><a href='families.html'>xy_normal</a></span>())
+<span class='fu'>add_uninformative</span><span class='op'>(</span><span class='va'>object</span>, <span class='va'>p</span>, collinearity <span class='op'>=</span> <span class='cn'>FALSE</span>, family <span class='op'>=</span> <span class='fu'><a href='families.html'>xy_normal</a></span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span>
 
-<span class='fu'>add_intercept</span>(<span class='no'>object</span>)
+<span class='fu'>add_intercept</span><span class='op'>(</span><span class='va'>object</span><span class='op'>)</span>
 
-<span class='fu'>add_noise</span>(<span class='no'>object</span>, <span class='kw'>collinearity</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>family</span> <span class='kw'>=</span> <span class='fu'><a href='families.html'>xy_normal</a></span>())
+<span class='fu'>add_noise</span><span class='op'>(</span><span class='va'>object</span>, collinearity <span class='op'>=</span> <span class='cn'>FALSE</span>, family <span class='op'>=</span> <span class='fu'><a href='families.html'>xy_normal</a></span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span>
 
-<span class='fu'>add_interactions</span>(<span class='no'>object</span>)</pre>
+<span class='fu'>add_interactions</span><span class='op'>(</span><span class='va'>object</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -172,34 +172,35 @@ a uniform distribution with minimum value of 0 and maximum value of
 <code># nonlinear simulation sim_nl &lt;- Xy(task = "regression") %&gt;% add_nonlinear(p = 5, nlfun = function(x) x^2, family = xy_uniform(min = 0, max = 1000))</code></p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='no'>xy_recipe</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='Xy.html'>Xy</a></span>(<span class='kw'>task</span> <span class='kw'>=</span> <span class='st'>"regression"</span>) <span class='kw'>%&gt;%</span>
+    <pre class="examples"><div class='input'><span class='va'>xy_recipe</span> <span class='op'>&lt;-</span> <span class='fu'><a href='Xy.html'>Xy</a></span><span class='op'>(</span>task <span class='op'>=</span> <span class='st'>"regression"</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
   <span class='co'># add linear features</span>
-  <span class='fu'>add_linear</span>(<span class='kw'>p</span> <span class='kw'>=</span> <span class='fl'>5</span>)
+  <span class='fu'>add_linear</span><span class='op'>(</span>p <span class='op'>=</span> <span class='fl'>5</span><span class='op'>)</span>
 
 <span class='co'># add cubic nonlinear features</span>
-<span class='no'>xy_recipe</span> <span class='kw'>&lt;-</span> <span class='no'>xy_recipe</span> <span class='kw'>%&gt;%</span>
-  <span class='fu'>add_nonlinear</span>(<span class='kw'>p</span> <span class='kw'>=</span> <span class='fl'>3</span>, <span class='kw'>nlfun</span> <span class='kw'>=</span> <span class='kw'>function</span>(<span class='no'>x</span>) <span class='no'>x</span>^<span class='fl'>3</span>, <span class='kw'>family</span> <span class='kw'>=</span> <span class='fu'><a href='families.html'>xy_uniform</a></span>(<span class='kw'>min</span> <span class='kw'>=</span> <span class='fl'>0</span>, <span class='kw'>max</span> <span class='kw'>=</span> <span class='fl'>1000</span>))
+<span class='va'>xy_recipe</span> <span class='op'>&lt;-</span> <span class='va'>xy_recipe</span> <span class='op'>%&gt;%</span>
+  <span class='fu'>add_nonlinear</span><span class='op'>(</span>p <span class='op'>=</span> <span class='fl'>3</span>, nlfun <span class='op'>=</span> <span class='kw'>function</span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span> <span class='va'>x</span><span class='op'>^</span><span class='fl'>3</span>, family <span class='op'>=</span> <span class='fu'><a href='families.html'>xy_uniform</a></span><span class='op'>(</span>min <span class='op'>=</span> <span class='fl'>0</span>, max <span class='op'>=</span> <span class='fl'>1000</span><span class='op'>)</span><span class='op'>)</span>
 
 <span class='co'># add discrete features with four unique factor levels</span>
-<span class='no'>xy_recipe</span> <span class='kw'>&lt;-</span> <span class='no'>xy_recipe</span> <span class='kw'>%&gt;%</span>
-  <span class='fu'>add_discrete</span>(<span class='kw'>p</span> <span class='kw'>=</span> <span class='fl'>2</span>, <span class='kw'>levels</span> <span class='kw'>=</span> <span class='fl'>4</span>)
+<span class='va'>xy_recipe</span> <span class='op'>&lt;-</span> <span class='va'>xy_recipe</span> <span class='op'>%&gt;%</span>
+  <span class='fu'>add_discrete</span><span class='op'>(</span>p <span class='op'>=</span> <span class='fl'>2</span>, levels <span class='op'>=</span> <span class='fl'>4</span><span class='op'>)</span>
 
 <span class='co'># add uninformative features (they do not influence the target generating process)</span>
-<span class='no'>xy_recipe</span> <span class='kw'>&lt;-</span> <span class='no'>xy_recipe</span> <span class='kw'>%&gt;%</span>
-  <span class='fu'>add_uninformative</span>(<span class='kw'>p</span> <span class='kw'>=</span> <span class='fl'>5</span>)
+<span class='va'>xy_recipe</span> <span class='op'>&lt;-</span> <span class='va'>xy_recipe</span> <span class='op'>%&gt;%</span>
+  <span class='fu'>add_uninformative</span><span class='op'>(</span>p <span class='op'>=</span> <span class='fl'>5</span><span class='op'>)</span>
 
 <span class='co'># add features from the cauchy distribution</span>
-<span class='no'>xy_recipe</span> <span class='kw'>&lt;-</span> <span class='no'>xy_recipe</span> <span class='kw'>%&gt;%</span>
-  <span class='fu'>add_linear</span>(<span class='kw'>p</span> <span class='kw'>=</span> <span class='fl'>2</span>, <span class='kw'>family</span> <span class='kw'>=</span> <span class='fu'><a href='families.html'>xy_cauchy</a></span>(<span class='kw'>location</span> <span class='kw'>=</span> <span class='fl'>3</span>, <span class='kw'>scale</span> <span class='kw'>=</span> <span class='fl'>5</span>))
+<span class='va'>xy_recipe</span> <span class='op'>&lt;-</span> <span class='va'>xy_recipe</span> <span class='op'>%&gt;%</span>
+  <span class='fu'>add_linear</span><span class='op'>(</span>p <span class='op'>=</span> <span class='fl'>2</span>, family <span class='op'>=</span> <span class='fu'><a href='families.html'>xy_cauchy</a></span><span class='op'>(</span>location <span class='op'>=</span> <span class='fl'>3</span>, scale <span class='op'>=</span> <span class='fl'>5</span><span class='op'>)</span><span class='op'>)</span>
 
 <span class='co'># add random interactions between all informative features</span>
-<span class='no'>xy_recipe</span> <span class='kw'>&lt;-</span> <span class='no'>xy_recipe</span> <span class='kw'>%&gt;%</span>
-  <span class='fu'>add_interactions</span>()
+<span class='va'>xy_recipe</span> <span class='op'>&lt;-</span> <span class='va'>xy_recipe</span> <span class='op'>%&gt;%</span>
+  <span class='fu'>add_interactions</span><span class='op'>(</span><span class='op'>)</span>
 
 <span class='co'># add a specific form of noise to your process, e.g. poisson distributed</span>
 <span class='co'># noise</span>
-<span class='no'>xy_recipe</span> <span class='kw'>&lt;-</span> <span class='no'>xy_recipe</span> <span class='kw'>%&gt;%</span>
-  <span class='fu'>add_noise</span>(<span class='kw'>family</span> <span class='kw'>=</span> <span class='fu'><a href='families.html'>xy_poisson</a></span>(<span class='kw'>lambda</span> <span class='kw'>=</span> <span class='fl'>3</span>))</div></pre>
+<span class='va'>xy_recipe</span> <span class='op'>&lt;-</span> <span class='va'>xy_recipe</span> <span class='op'>%&gt;%</span>
+  <span class='fu'>add_noise</span><span class='op'>(</span>family <span class='op'>=</span> <span class='fu'><a href='families.html'>xy_poisson</a></span><span class='op'>(</span>lambda <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span><span class='op'>)</span>
+</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
@@ -215,7 +216,7 @@ a uniform distribution with minimum value of 0 and maximum value of
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
 </div>
 
       </footer>

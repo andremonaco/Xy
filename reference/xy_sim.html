@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Methods of the class <code><a href='Xy.html'>xy_sim</a></code> — xy_sim • Xy</title>
+<title>Methods of the class xy_sim — xy_sim • Xy</title>
 
 
 <!-- jquery -->
@@ -39,7 +39,7 @@
 
 
 
-<meta property="og:title" content="Methods of the class <code><a href='Xy.html'>xy_sim</a></code> — xy_sim" />
+<meta property="og:title" content="Methods of the class xy_sim — xy_sim" />
 <meta property="og:description" content="Methods of the class xy_sim" />
 
 
@@ -80,7 +80,7 @@
       <ul class="nav navbar-nav">
         <li>
   <a href="../index.html">
-    <span class="fas fa fas fa-home fa-lg"></span>
+    <span class="fas fa-home fa-lg"></span>
      
   </a>
 </li>
@@ -113,19 +113,19 @@
     </div>
 
     <pre class="usage"><span class='co'># S3 method for xy_sim</span>
-<span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span>(<span class='no'>x</span>, <span class='no'>...</span>)
+<span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='va'>x</span>, <span class='va'>...</span><span class='op'>)</span>
 
 <span class='co'># S3 method for xy_sim</span>
-<span class='fu'><a href='https://rdrr.io/r/stats/coef.html'>coef</a></span>(<span class='no'>object</span>, <span class='no'>...</span>)
+<span class='fu'><a href='https://rdrr.io/r/stats/coef.html'>coef</a></span><span class='op'>(</span><span class='va'>object</span>, <span class='va'>...</span><span class='op'>)</span>
 
 <span class='co'># S3 method for xy_sim</span>
-<span class='fu'><a href='https://rdrr.io/r/base/plot.html'>plot</a></span>(<span class='no'>x</span>, <span class='no'>...</span>)
+<span class='fu'><a href='https://rdrr.io/r/graphics/plot.default.html'>plot</a></span><span class='op'>(</span><span class='va'>x</span>, <span class='va'>...</span><span class='op'>)</span>
 
 <span class='co'># S3 method for xy_sim</span>
-<span class='fu'><a href='https://rdrr.io/r/base/transform.html'>transform</a></span>(<span class='no'>`_data`</span>, <span class='no'>...</span>)
+<span class='fu'><a href='https://rdrr.io/r/base/transform.html'>transform</a></span><span class='op'>(</span><span class='va'>`_data`</span>, <span class='va'>...</span><span class='op'>)</span>
 
 <span class='co'># S3 method for xy_sim</span>
-<span class='fu'><a href='https://rdrr.io/r/stats/formula.html'>formula</a></span>(<span class='no'>x</span>, <span class='no'>...</span>)</pre>
+<span class='fu'><a href='https://rdrr.io/r/stats/formula.html'>formula</a></span><span class='op'>(</span><span class='va'>x</span>, <span class='va'>...</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -170,12 +170,13 @@ features are added as well.</p></li>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='co'># create a simulation</span>
-<span class='no'>linear_sim</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='Xy.html'>Xy</a></span>() <span class='kw'>%&gt;%</span>
-  <span class='fu'><a href='add_effects.html'>add_linear</a></span>(<span class='kw'>p</span> <span class='kw'>=</span> <span class='fl'>5</span>) <span class='kw'>%&gt;%</span>
-  <span class='fu'><a href='simulate.html'>simulate</a></span>(<span class='kw'>n</span> <span class='kw'>=</span> <span class='fl'>100</span>)
+<span class='va'>linear_sim</span> <span class='op'>&lt;-</span> <span class='fu'><a href='Xy.html'>Xy</a></span><span class='op'>(</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
+  <span class='fu'><a href='add_effects.html'>add_linear</a></span><span class='op'>(</span>p <span class='op'>=</span> <span class='fl'>5</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
+  <span class='fu'><a href='simulate.html'>simulate</a></span><span class='op'>(</span>n <span class='op'>=</span> <span class='fl'>100</span><span class='op'>)</span>
 
 <span class='co'># print the simulation</span>
-<span class='no'>simulation_info</span> <span class='kw'>&lt;-</span> <span class='no'>linear_sim</span> <span class='kw'>%&gt;%</span> <span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span>()</div><div class='output co'>#&gt; <span style='font-weight: bold;'>Xy Simulation 
+<span class='va'>simulation_info</span> <span class='op'>&lt;-</span> <span class='va'>linear_sim</span> <span class='op'>%&gt;%</span> <span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; <span style='font-weight: bold;'>Xy Simulation 
 #&gt; </span><span>
 #&gt; </span><span style='font-weight: bold;'>recipe
 #&gt; </span><span>▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬ 
@@ -201,16 +202,18 @@ features are added as well.</p></li>
 #&gt; + 0.39 x_5  
 #&gt; + </span><span style='font-weight: bold;'>e ~ norm(mean = 0, sd = 3)</span><span></div><div class='input'>
 <span class='co'># get the coefficients of the features</span>
-<span class='no'>simulation_coefs</span> <span class='kw'>&lt;-</span> <span class='no'>linear_sim</span> <span class='kw'>%&gt;%</span> <span class='fu'><a href='https://rdrr.io/r/stats/coef.html'>coef</a></span>()
+<span class='va'>simulation_coefs</span> <span class='op'>&lt;-</span> <span class='va'>linear_sim</span> <span class='op'>%&gt;%</span> <span class='fu'><a href='https://rdrr.io/r/stats/coef.html'>coef</a></span><span class='op'>(</span><span class='op'>)</span>
 
 <span class='co'># plot the underlying true effect of X</span>
-<span class='no'>simulation_plot</span> <span class='kw'>&lt;-</span> <span class='no'>linear_sim</span> <span class='kw'>%&gt;%</span> <span class='fu'><a href='https://rdrr.io/r/base/plot.html'>plot</a></span>()</div><div class='img'><img src='xy_sim-1.png' alt='' width='700' height='433' /></div><div class='input'>
+<span class='va'>simulation_plot</span> <span class='op'>&lt;-</span> <span class='va'>linear_sim</span> <span class='op'>%&gt;%</span> <span class='fu'><a href='https://rdrr.io/r/graphics/plot.default.html'>plot</a></span><span class='op'>(</span><span class='op'>)</span>
+</div><div class='img'><img src='xy_sim-1.png' alt='' width='700' height='433' /></div><div class='input'>
 <span class='co'># transform the data of the simulation such that the features are transformed</span>
 <span class='co'># e.g. nonlinear features are scaled by their functions.</span>
-<span class='no'>transformed_simulation</span> <span class='kw'>&lt;-</span> <span class='no'>linear_sim</span> <span class='kw'>%&gt;%</span> <span class='fu'><a href='https://rdrr.io/r/base/transform.html'>transform</a></span>()
+<span class='va'>transformed_simulation</span> <span class='op'>&lt;-</span> <span class='va'>linear_sim</span> <span class='op'>%&gt;%</span> <span class='fu'><a href='https://rdrr.io/r/base/transform.html'>transform</a></span><span class='op'>(</span><span class='op'>)</span>
 
 <span class='co'># fetch the formula</span>
-<span class='no'>eqn</span> <span class='kw'>&lt;-</span> <span class='no'>linear_sim</span> <span class='kw'>%&gt;%</span> <span class='fu'><a href='https://rdrr.io/r/stats/formula.html'>formula</a></span>()</div></span></pre>
+<span class='va'>eqn</span> <span class='op'>&lt;-</span> <span class='va'>linear_sim</span> <span class='op'>%&gt;%</span> <span class='fu'><a href='https://rdrr.io/r/stats/formula.html'>formula</a></span><span class='op'>(</span><span class='op'>)</span>
+</div></span></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
@@ -226,7 +229,7 @@ features are added as well.</p></li>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
 </div>
 
       </footer>

@@ -80,7 +80,7 @@
       <ul class="nav navbar-nav">
         <li>
   <a href="../index.html">
-    <span class="fas fa fas fa-home fa-lg"></span>
+    <span class="fas fa-home fa-lg"></span>
      
   </a>
 </li>
@@ -112,15 +112,15 @@
     <p>Extract the simulated effects out of a cooked simulation recipe</p>
     </div>
 
-    <pre class="usage"><span class='fu'>pull_x</span>(<span class='no'>object</span>)
+    <pre class="usage"><span class='fu'>pull_x</span><span class='op'>(</span><span class='va'>object</span><span class='op'>)</span>
 
-<span class='fu'>pull_y</span>(<span class='no'>object</span>)
+<span class='fu'>pull_y</span><span class='op'>(</span><span class='va'>object</span><span class='op'>)</span>
 
-<span class='fu'>pull_e</span>(<span class='no'>object</span>)
+<span class='fu'>pull_e</span><span class='op'>(</span><span class='va'>object</span><span class='op'>)</span>
 
-<span class='fu'>pull_xy</span>(<span class='no'>object</span>)
+<span class='fu'>pull_xy</span><span class='op'>(</span><span class='va'>object</span><span class='op'>)</span>
 
-<span class='fu'>pull_xye</span>(<span class='no'>object</span>)</pre>
+<span class='fu'>pull_xye</span><span class='op'>(</span><span class='va'>object</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -143,17 +143,18 @@ extract out of the simulation</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='co'># create a simulation</span>
-<span class='no'>linear_sim</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='Xy.html'>Xy</a></span>() <span class='kw'>%&gt;%</span>
-  <span class='fu'><a href='add_effects.html'>add_linear</a></span>(<span class='kw'>p</span> <span class='kw'>=</span> <span class='fl'>5</span>) <span class='kw'>%&gt;%</span>
-  <span class='fu'><a href='simulate.html'>simulate</a></span>(<span class='kw'>n</span> <span class='kw'>=</span> <span class='fl'>100</span>)
+<span class='va'>linear_sim</span> <span class='op'>&lt;-</span> <span class='fu'><a href='Xy.html'>Xy</a></span><span class='op'>(</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
+  <span class='fu'><a href='add_effects.html'>add_linear</a></span><span class='op'>(</span>p <span class='op'>=</span> <span class='fl'>5</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
+  <span class='fu'><a href='simulate.html'>simulate</a></span><span class='op'>(</span>n <span class='op'>=</span> <span class='fl'>100</span><span class='op'>)</span>
 <span class='co'># fetch the target</span>
-<span class='no'>y</span> <span class='kw'>&lt;-</span> <span class='no'>linear_sim</span> <span class='kw'>%&gt;%</span> <span class='fu'>pull_y</span>()
+<span class='va'>y</span> <span class='op'>&lt;-</span> <span class='va'>linear_sim</span> <span class='op'>%&gt;%</span> <span class='fu'>pull_y</span><span class='op'>(</span><span class='op'>)</span>
 <span class='co'># fetch all features</span>
-<span class='no'>X</span> <span class='kw'>&lt;-</span> <span class='no'>linear_sim</span> <span class='kw'>%&gt;%</span> <span class='fu'>pull_x</span>()
+<span class='va'>X</span> <span class='op'>&lt;-</span> <span class='va'>linear_sim</span> <span class='op'>%&gt;%</span> <span class='fu'>pull_x</span><span class='op'>(</span><span class='op'>)</span>
 <span class='co'># fetch the features and the target</span>
-<span class='no'>xy</span> <span class='kw'>&lt;-</span> <span class='no'>linear_sim</span> <span class='kw'>%&gt;%</span> <span class='fu'>pull_xy</span>()
+<span class='va'>xy</span> <span class='op'>&lt;-</span> <span class='va'>linear_sim</span> <span class='op'>%&gt;%</span> <span class='fu'>pull_xy</span><span class='op'>(</span><span class='op'>)</span>
 <span class='co'># fetch the residuals of the simulation</span>
-<span class='no'>e</span> <span class='kw'>&lt;-</span> <span class='no'>linear_sim</span> <span class='kw'>%&gt;%</span> <span class='fu'>pull_e</span>()</div></pre>
+<span class='va'>e</span> <span class='op'>&lt;-</span> <span class='va'>linear_sim</span> <span class='op'>%&gt;%</span> <span class='fu'>pull_e</span><span class='op'>(</span><span class='op'>)</span>
+</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
@@ -169,7 +170,7 @@ extract out of the simulation</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
 </div>
 
       </footer>
