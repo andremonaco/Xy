@@ -44,7 +44,7 @@ Install the package with <code>remotes</code>:
 ```
 # install.packages("remotes") 
 # install from github
-remotes::install_github("andrebleier/Xy")            
+remotes::install_github("andremonaco/Xy")            
 ```
 
 ### Simulate data 
@@ -88,6 +88,6 @@ You can extract a feature importance of your simulation. For instance, to benchm
 # Feature Importance 
 variable_importance <- sim %>% importance()
 ```
-<img src="https://github.com/andrebleier/Xy/raw/master/man/figures/imp.png" alt="drawing"/> 
+<img src="https://github.com/andremonaco/Xy/raw/master/man/figures/imp.png" alt="drawing"/> 
 
-Feel free to [contact](mailto:andre.bleier@statworx.com) me with input and ideas.
+Feel free to [contact](mailto:andre.monaco@statworx.com) me with input and ideas.
